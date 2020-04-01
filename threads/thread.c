@@ -28,6 +28,12 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+/* List of process in THREAD_BLOCKED */
+static struct list sleep_list;
+
+/* Minimum of wakeup_tick in sleep_list */
+static int64_t next_tick_to_awake = 0;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -108,6 +114,7 @@ thread_init (void) {
 	/* Init the globla thread context */
 	lock_init (&tid_lock);
 	list_init (&ready_list);
+	list_init (&sleep_list);
 	list_init (&destruction_req);
 
 	/* Set up a thread structure for the running thread. */
@@ -587,4 +594,59 @@ allocate_tid (void) {
 	lock_release (&tid_lock);
 
 	return tid;
+}
+
+void thread_sleep(int64_t ticks) {
+	struct thread *curr = thread_current ();
+	enum intr_level old_level;
+
+	ASSERT (!intr_context ());
+
+	old_level = intr_disable();
+	if (curr != idle_thread)
+	{
+		curr->status = THREAD_BLOCKED;								/* current thread status를 THREAD_BLOCKED로 바꿈 */
+		curr->wakeup_tick = ticks;									/* current thread wakeup_tick을 ticks로 설정 */
+		list_push_back (&sleep_list, &curr->elem);					/* sleep queue에 current_element 삽입 */
+		if (!next_tick_to_awake || ticks < next_tick_to_awake)		/* next_tick_to_awake가 0이 아니고, ticks가 next_tick_to_awake보다 작을때 update */
+		{
+			next_tick_to_awake = ticks;
+		}
+	}
+	do_schedule (THREAD_READY);									
+	intr_set_level (old_level);
+}
+
+void thread_awake(int64_t ticks) {
+	struct list_elem *a = list_begin(&sleep_list);
+	if (a != list_end(&sleep_list)) {
+		struct list_elem *e;
+
+		for (e = a; e != list_end(&sleep_list) ;e = list_next(e))
+		{
+			struct thread *b = list_entry(e, struct thread, elem);
+			if (b->wakeup_tick <= ticks) {
+				list_remove(e);
+				thread_unblock(b);
+			}
+			else {
+				update_next_tick_to_awake(b->wakeup_tick);
+			}
+		}
+	}
+}
+
+void update_next_tick_to_awake(int64_t ticks) {
+	if (ticks < next_tick_to_awake) {
+		next_tick_to_awake = ticks;
+	}
+
+	if (next_tick_to_awake <= timer_ticks())
+	{
+		next_tick_to_awake = ticks;
+	}
+}
+
+int64_t get_next_tick_to_awake(void) {
+	return next_tick_to_awake;
 }

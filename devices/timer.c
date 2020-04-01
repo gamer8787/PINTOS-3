@@ -93,8 +93,12 @@ timer_sleep (int64_t ticks) {
 	int64_t start = timer_ticks ();
 
 	ASSERT (intr_get_level () == INTR_ON);
-	while (timer_elapsed (start) < ticks)
-		thread_yield ();
+	// while (timer_elapsed (start) < ticks)
+	//	thread_yield ();
+	if (timer_elapsed (start) < ticks)  // ticks가 현재시간 - start기준시간 보다 큰 경우
+	{
+		thread_sleep(start + ticks);  // start기준시간 + ticks만큼 thread_sleep 호출
+	}
 }
 
 /* Suspends execution for approximately MS milliseconds. */
@@ -126,6 +130,12 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
+
+	int64_t next_tick_to_interrupt = get_next_tick_to_awake();
+	if (ticks == next_tick_to_interrupt)
+	{
+		thread_awake(ticks);
+	}
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

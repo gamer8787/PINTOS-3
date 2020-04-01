@@ -87,6 +87,7 @@ struct thread {
 	enum thread_status status;          /* Thread state. */
 	char name[16];                      /* Name (for debugging purposes). */
 	int priority;                       /* Priority. */
+	int64_t wakeup_tick;				/* Wakeup_tick*/
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
@@ -134,5 +135,10 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 void do_iret (struct intr_frame *tf);
+
+void thread_sleep(int64_t ticks);								/* 실행중인 스레드를 sleep으로 만듬 */
+void thread_awake(int64_t ticks);								/* 슬립큐에서 깨워야할 스레드 깨움 */
+void update_next_tick_to_awake(int64_t ticks);					/* 최소 틱을 가진 스레드 저장 */
+int64_t get_next_tick_to_awake(void);							/* thread.c의 next_tick_to_awake 반환 */
 
 #endif /* threads/thread.h */
