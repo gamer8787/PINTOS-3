@@ -621,7 +621,7 @@ void thread_awake(int64_t ticks) {
 	if (a != list_end(&sleep_list)) {
 		struct list_elem *e;
 
-		for (e = a; e != list_end(&sleep_list) ;e = list_next(e))
+		for (e = a; e != list_rbegin(&sleep_list) ;e = list_next(e))
 		{
 			struct thread *b = list_entry(e, struct thread, elem);
 			if (b->wakeup_tick <= ticks) {
