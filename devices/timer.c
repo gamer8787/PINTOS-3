@@ -98,6 +98,7 @@ timer_sleep (int64_t ticks) {
 	if (timer_elapsed (start) < ticks)  // ticks가 현재시간 - start기준시간 보다 큰 경우
 	{
 		thread_sleep(start + ticks);  // start기준시간 + ticks만큼 thread_sleep 호출
+		printf("--------thread_sleep called %d tick--------\n", ticks);
 	}
 }
 
