@@ -135,6 +135,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	if (ticks == next_tick_to_interrupt)
 	{
 		thread_awake(ticks);
+		printf("------thread_awake called at %d tick--------\n", ticks);
 	}
 }
 
