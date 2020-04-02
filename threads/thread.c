@@ -613,7 +613,7 @@ void thread_sleep(int64_t ticks) {
 			next_tick_to_awake = ticks;
 		}
 	}
-	do_schedule (THREAD_READY);									
+	do_schedule (THREAD_BLOCKED);								
 	intr_set_level (old_level);
 }
 
