@@ -604,8 +604,7 @@ void thread_sleep(int64_t ticks) {
 
 	old_level = intr_disable();
 	if (curr != idle_thread)
-	{
-		curr->status = THREAD_BLOCKED;								/* current thread status를 THREAD_BLOCKED로 바꿈 */
+	{							
 		curr->wakeup_tick = ticks;									/* current thread wakeup_tick을 ticks로 설정 */
 		list_push_back (&sleep_list, &curr->elem);					/* sleep queue에 current_element 삽입 */
 		if (!next_tick_to_awake || ticks < next_tick_to_awake)		/* next_tick_to_awake가 0이 아니고, ticks가 next_tick_to_awake보다 작을때 update */
