@@ -655,6 +655,12 @@ int64_t get_next_tick_to_awake(void) {
 }
 
 void test_max_priority (void) {
+	enum intr_level old_level;
+
+	ASSERT (!intr_context ());
+
+	old_level = intr_disable();
+
 	if (!list_empty(&ready_list))
 	{
 		struct thread *curr = thread_current();													/* current thread */
@@ -665,6 +671,8 @@ void test_max_priority (void) {
 			do_schedule(THREAD_READY);															/* scheduling */
 		}
 	}
+
+	intr_set_level (old_level);
 }
 
 bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void* aux UNUSED) {	/* 첫번째 인자의 우선순위가 높으면 1 */
