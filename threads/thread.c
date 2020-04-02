@@ -617,22 +617,23 @@ void thread_sleep(int64_t ticks) {
 }
 
 void thread_awake(int64_t ticks) {
-	struct list_elem *a = list_begin(&sleep_list);
-	if (a != list_end(&sleep_list)) {
-		struct list_elem *e;
-
-		for (e = a; e != list_end(&sleep_list) ;e = list_next(e))
-		{
-			struct thread *b = list_entry(e, struct thread, elem);
-			if (b->wakeup_tick <= ticks) {
-				list_remove(e);
-				thread_unblock(b);
-			}
-			else {
-				update_next_tick_to_awake(b->wakeup_tick);
-			}
-		}
-	}
+   struct list_elem* a = list_begin(&sleep_list);
+   if (a != list_end(&sleep_list)) {
+      struct list_elem* e;
+      e = a;
+      while (e != list_end(&sleep_list))
+      {
+         struct thread* b = list_entry(e, struct thread, elem);
+         if (b->wakeup_tick <= ticks) {
+            e = list_remove(e);
+            thread_unblock(b);
+         }
+         else {
+            e = list_next(e);
+            update_next_tick_to_awake(b->wakeup_tick);
+         }
+      }
+   }
 }
 
 void update_next_tick_to_awake(int64_t ticks) {
