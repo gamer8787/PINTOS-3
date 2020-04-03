@@ -70,6 +70,7 @@ sema_down (struct semaphore *sema) {
 		thread_block ();
 	}
 	sema->value--;
+	printf("----------sema_down called-------------\n");
 	intr_set_level (old_level);
 }
 
@@ -116,8 +117,9 @@ sema_up (struct semaphore *sema) {
 					struct thread, elem));
 	}
 	sema->value++;
+	printf("----------sema_up called------------\n");
 
-	thread_yield();														/* priority preemption */
+	test_max_priority();														/* priority preemption */
 
 	intr_set_level (old_level);
 }
