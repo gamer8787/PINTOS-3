@@ -117,13 +117,9 @@ sema_up (struct semaphore *sema) {
 		list_sort(&sema->waiters, cmp_priority, NULL);							/* waiters list에 있는동안 우선순위 변경 고려 */
 		next = list_entry(list_pop_front(&sema->waiters), struct thread, elem);
 		thread_unblock (next);
+		test_max_priority();
 	}
 	sema->value++;
-
-	if (next != NULL || (&next->priority > &cur->priority))
-	{
-		test_max_priority();														/* priority preemption */
-	}
 
 	intr_set_level (old_level);
 }
