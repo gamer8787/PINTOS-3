@@ -120,16 +120,15 @@ sema_up(struct semaphore* sema) {
       thread_unblock(next);
       
    }
-   //test_max_priority(); // 레디 안 priority 큰것과 현재 비교
+
    sema->value++;         
    
-   if (next != NULL && (&next->priority > &cur->priority))
+   if (next != NULL)
    {
-      thread_yield();
+      test_max_priority();
    }
 
    intr_set_level(old_level);
-   //thread_yield();
 }
 
 static void sema_test_helper (void *sema_);
