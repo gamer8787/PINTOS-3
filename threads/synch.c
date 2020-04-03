@@ -70,7 +70,7 @@ sema_down (struct semaphore *sema) {
 		thread_block ();
 	}
 	sema->value--;
-	
+
 	intr_set_level (old_level);
 }
 
@@ -118,9 +118,9 @@ sema_up (struct semaphore *sema) {
 	}
 	sema->value++;
 
-	test_max_priority();														/* priority preemption */
-
 	intr_set_level (old_level);
+	
+	thread_yield();
 }
 
 static void sema_test_helper (void *sema_);
