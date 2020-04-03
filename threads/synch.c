@@ -120,7 +120,9 @@ sema_up (struct semaphore *sema) {
 	}
 	sema->value++;
 
-	if (next != NULL && (&next->priority > &cur->priority))
+	//if (next != NULL && (&next->priority > &cur->priority))
+	if (next != NULL)
+	//if (&next->priority > &cur->priority)
 	{
 		test_max_priority();														/* priority preemption */
 	}
