@@ -123,10 +123,8 @@ sema_up(struct semaphore* sema) {
 
    sema->value++;         
    
-   if (next != NULL)
-   {
-      test_max_priority();
-   }
+   test_max_priority();
+   
 
    intr_set_level(old_level);
 }
