@@ -120,7 +120,35 @@ sema_up (struct semaphore *sema) {
 
 	intr_set_level (old_level);
 	
-	thread_yield();
+	test_max_priority();
+}
+
+void
+sema_up(struct semaphore* sema) {
+   enum intr_level old_level;
+   struct thread* cur = thread_current();
+   struct thread* next = NULL;
+   ASSERT(sema != NULL);
+
+   old_level = intr_disable();
+
+   if (!list_empty(&sema->waiters))
+   {
+      list_sort(&sema->waiters, cmp_priority, NULL); //스레드가 waiters에 있는 동안 우선순위 바낀 경우 고려 waiters를
+      next = list_entry(list_pop_front(&sema->waiters), struct thread, elem);
+      thread_unblock(next);
+      
+   }
+   //test_max_priority(); // 레디 안 priority 큰것과 현재 비교
+   sema->value++;         
+   
+   if (next != NULL && (&next->priority > &cur->priority))
+   {
+      thread_yield();
+   }
+
+   intr_set_level(old_level);
+   //thread_yield();
 }
 
 static void sema_test_helper (void *sema_);
