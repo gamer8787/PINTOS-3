@@ -322,7 +322,7 @@ void
 thread_set_priority (int new_priority) {
 	thread_current ()->priority = new_priority;
 	refresh_priority();
-	donate_priority();
+	//donate_priority();
 
 	test_max_priority();
 }
