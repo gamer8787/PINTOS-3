@@ -322,7 +322,7 @@ void
 thread_set_priority (int new_priority) {
 	thread_current ()->priority = new_priority;
 	refresh_priority();
-	//donate_priority();
+	donate_priority();
 
 	test_max_priority();
 }
@@ -695,11 +695,13 @@ void donate_priority(void)
    //struct list *nested_list = &holder->donation_elem;
    //struct list_elem *nested_begin = list_begin(&nested_list);
 
-   if (holder->priority < cur->priority)
+   if (holder != NULL)
    {
+	   if (holder->priority < cur->priority) 
+	   {
 	   holder->priority = cur->priority;
+	   }
    }
-
    /*if (multi_begin != list_end(donations)) {
       struct list_elem *e = multi_begin;
       while (e != list_end(donations))
