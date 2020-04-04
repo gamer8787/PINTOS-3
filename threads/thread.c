@@ -733,7 +733,7 @@ void remove_with_lock(struct lock *lock) {
 				multi_elem = list_remove(multi_elem);
 			}
 			else {
-				ASSERT(multi_elem != list_tail(&curr->donations));
+				ASSERT(is_head(multi_elem) || is_interior(multi_elem));
 				multi_elem = list_next(multi_elem);
 			}
 		}
