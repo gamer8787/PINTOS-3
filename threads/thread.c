@@ -692,28 +692,17 @@ void donate_priority(void)
 {
    struct thread* cur = thread_current();
    struct thread* holder;
-   if (cur->wait_on_lock != NULL) {
+   while (cur->wait_on_lock != NULL) {
       ASSERT(cur->wait_on_lock != NULL);
 	  holder = cur->wait_on_lock->holder;
-
-      //struct list *nested_list = &holder->donation_elem;
-      //struct list_elem *nested_begin = list_begin(&nested_list);
 
       if (holder->priority < cur->priority)
       {
          holder->priority = cur->priority;
       }
+
+	  cur = holder;
    }
-   /*if (multi_begin != list_end(donations)) {
-      struct list_elem *e = multi_begin;
-      while (e != list_end(donations))
-      {
-        struct thread *a = list_entry(e, struct thread, elem);
-        if (a->priority )
-        b->priority = &cur->priority;
-        e = list_next(e);
-      }
-   }*/
 }
 
 void remove_with_lock(struct lock *lock) {
