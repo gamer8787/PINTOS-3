@@ -718,18 +718,23 @@ void donate_priority(void)
 
 void remove_with_lock(struct lock *lock) {
 	struct thread *curr = thread_current();
-	struct list_elem *multi_elem = list_begin(&curr->donations);
-	struct list_elem *multi_end = list_end(&curr->donations);
+	struct list_elem *multi_begin = list_begin(&curr->donations);
 
-	while (multi_elem != multi_end)
+	if (multi_begin != list_end(&curr->donations)) 
 	{
-		struct thread *t = list_entry(multi_elem, struct thread, elem);
-		if (t->wait_on_lock == lock)
+		struct list_elem *multi_elem;
+		multi_elem = multi_begin;
+
+		while (multi_elem != list_end(&curr->donations))
 		{
-			multi_elem = list_remove(multi_elem);
-		}
-		else {
-			multi_elem = list_next(multi_elem);
+			struct thread *t = list_entry(multi_elem, struct thread, elem);
+			if (t->wait_on_lock == lock)
+			{
+				multi_elem = list_remove(multi_elem);
+			}
+			else {
+				multi_elem = list_next(multi_elem);
+			}
 		}
 	}
 }
