@@ -695,7 +695,7 @@ void donate_priority(void)
    //struct list *nested_list = &holder->donation_elem;
    //struct list_elem *nested_begin = list_begin(&nested_list);
 
-   if (holder != NULL)
+   if (cur->wait_on_lock != NULL)
    {
 	   if (holder->priority < cur->priority) 
 	   {
