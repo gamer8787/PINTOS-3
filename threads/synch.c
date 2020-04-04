@@ -203,13 +203,13 @@ lock_acquire (struct lock *lock) {
 	if (lock->holder != NULL)
 	{
 		curr->wait_on_lock = lock;
-		list_push_back(&lock->holder->donations, &curr->elem);				/* 이전상태의 우선순위 기억 */
+		list_push_front(&lock->holder->donations, &curr->elem);				/* 이전상태의 우선순위 기억 */
 		donate_priority();
 	}
 
 	sema_down (&lock->semaphore);
 	thread_current()->wait_on_lock = NULL;
-	lock->holder = thread_current ();
+	lock->holder = thread_current();
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
