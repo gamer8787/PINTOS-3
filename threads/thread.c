@@ -690,26 +690,28 @@ bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void* a
 
 void donate_priority(void)
 {
-   struct thread *cur = thread_current();
-   struct thread *holder = cur->wait_on_lock->holder;
-   //struct list *nested_list = &holder->donation_elem;
-   //struct list_elem *nested_begin = list_begin(&nested_list);
+   struct thread* cur = thread_current();
+   struct thread* holder;
+   if (cur->wait_on_lock != NULL) {
+      ASSERT(cur->wait_on_lock != NULL);
+	  holder = cur->wait_on_lock->holder;
 
-   if (cur->wait_on_lock != NULL)
-   {
-	   if (holder->priority < cur->priority) 
-	   {
-	   holder->priority = cur->priority;
-	   }
+      //struct list *nested_list = &holder->donation_elem;
+      //struct list_elem *nested_begin = list_begin(&nested_list);
+
+      if (holder->priority < cur->priority)
+      {
+         holder->priority = cur->priority;
+      }
    }
    /*if (multi_begin != list_end(donations)) {
       struct list_elem *e = multi_begin;
       while (e != list_end(donations))
       {
-         struct thread *a = list_entry(e, struct thread, elem);
-		 if (a->priority )
-         b->priority = &cur->priority;
-         e = list_next(e);
+        struct thread *a = list_entry(e, struct thread, elem);
+        if (a->priority )
+        b->priority = &cur->priority;
+        e = list_next(e);
       }
    }*/
 }
