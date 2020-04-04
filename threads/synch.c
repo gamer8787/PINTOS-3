@@ -203,7 +203,7 @@ lock_acquire (struct lock *lock) {
 	if (lock->holder != NULL)
 	{
 		curr->wait_on_lock = lock;
-		list_push_front(&lock->holder->donations, &curr->elem);				/* 이전상태의 우선순위 기억 */
+		list_push_front(&lock->holder->donations, &curr->donation_elem);				/* 이전상태의 우선순위 기억 */
 		donate_priority();
 	}
 

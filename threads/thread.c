@@ -727,13 +727,12 @@ void remove_with_lock(struct lock *lock) {
 
 		while (multi_elem != list_end(&curr->donations))
 		{
-			struct thread *t = list_entry(multi_elem, struct thread, elem);
+			struct thread *t = list_entry(multi_elem, struct thread, donation_elem);
 			if (t->wait_on_lock == lock)
 			{
 				multi_elem = list_remove(multi_elem);
 			}
 			else {
-				ASSERT(is_head(multi_elem) || is_interior(multi_elem));
 				multi_elem = list_next(multi_elem);
 			}
 		}
@@ -749,7 +748,7 @@ void refresh_priority(void) {
 
 	while (multi_elem != multi_end)
 	{
-		struct thread *t = list_entry(multi_elem, struct thread, elem);
+		struct thread *t = list_entry(multi_elem, struct thread, donation_elem);
 		if (curr->priority < t->priority) 
 		{
 			curr->priority = t->priority;

@@ -94,7 +94,7 @@ struct thread {
 	int init_priority;					/* Initial priority */
 	struct lock *wait_on_lock;			/* Lock that this thread is waiting for */
 	struct list donations;				/* For multiple donations */
-	struct list_elem donation_elem;		/* For nested donations */
+	struct list_elem donation_elem;		/* For multiple donations */
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
