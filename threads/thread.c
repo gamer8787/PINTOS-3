@@ -321,6 +321,7 @@ thread_yield (void) {
 void
 thread_set_priority (int new_priority) {
 	thread_current ()->priority = new_priority;
+	refresh_priority();
 
 	test_max_priority();
 }
@@ -418,6 +419,10 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
+	t->init_priority = priority;
+	t->wait_on_lock = NULL;
+	list_init(&t->donations);
+	/* t->elem, t->donation_elem 은 초기화 안함 */
 	t->magic = THREAD_MAGIC;
 }
 
@@ -680,4 +685,63 @@ bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void* a
 	struct thread *thread_b = list_entry(b, struct thread, elem);
 
 	return thread_a->priority > thread_b->priority;
+}
+
+void donate_priority(void)
+{
+   struct thread *cur = thread_current();
+   struct thread *holder = cur->wait_on_lock->holder;
+   //struct list *nested_list = &holder->donation_elem;
+   //struct list_elem *nested_begin = list_begin(&nested_list);
+
+   if (holder->priority < cur->priority)
+   {
+	   holder->priority = cur->priority;
+   }
+
+   /*if (multi_begin != list_end(donations)) {
+      struct list_elem *e = multi_begin;
+      while (e != list_end(donations))
+      {
+         struct thread *a = list_entry(e, struct thread, elem);
+		 if (a->priority )
+         b->priority = &cur->priority;
+         e = list_next(e);
+      }
+   }*/
+}
+
+void remove_with_lock(struct lock *lock) {
+	struct thread *curr = thread_current();
+	struct list_elem *multi_elem = list_begin(&curr->donations);
+	struct list_elem *multi_end = list_end(&curr->donations);
+
+	while (multi_elem != multi_end)
+	{
+		struct thread *t = list_entry(multi_elem, struct thread, elem);
+		if (t->wait_on_lock == lock)
+		{
+			multi_elem = list_remove(multi_elem);
+		}
+		else {
+			multi_elem = list_next(multi_elem);
+		}
+	}
+}
+
+void refresh_priority(void) {
+	struct thread *curr = thread_current();
+	struct list_elem *multi_elem = list_begin(&curr->donations);
+	struct list_elem *multi_end = list_end(&curr->donations);
+
+	curr->priority = curr->init_priority;
+
+	while (multi_elem != multi_end)
+	{
+		struct thread *t = list_entry(multi_elem, struct thread, elem);
+		if (curr->priority < t->priority) 
+		{
+			curr->priority = t->priority;
+		}
+	}
 }

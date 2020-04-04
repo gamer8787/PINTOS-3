@@ -91,6 +91,10 @@ struct thread {
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
+	int init_priority;					/* Initial priority */
+	struct lock *wait_on_lock;			/* Lock that this thread is waiting for */
+	struct list donations;				/* For multiple donations */
+	struct list_elem donation_elem;		/* For nested donations */
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -140,6 +144,10 @@ void thread_sleep(int64_t ticks);								/* 실행중인 스레드를 sleep으�
 void thread_awake(int64_t ticks);								/* 슬립큐에서 깨워야할 스레드 깨움 */
 void update_next_tick_to_awake(int64_t ticks);					/* 최소 틱을 가진 스레드 저장 */
 int64_t get_next_tick_to_awake(void);							/* thread.c의 next_tick_to_awake 반환 */
+
+void donate_priority(void);
+void remove_with_lock(struct lock *lock);
+void refresh_priority(void);
 
 void test_max_priority (void);									/* 현재 수행중인 스레드와 가장 높은 우선순위 스레드 비교하여 스케줄링 */
 bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED); /* 인자로 주어진 스레드들의 우선순위 비교 */
