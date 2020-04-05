@@ -478,8 +478,8 @@ init_thread(struct thread* t, const char* name, int priority) {
    strlcpy(t->name, name, sizeof t->name);
    t->tf.rsp = (uint64_t)t + PGSIZE - sizeof(void*);
    t->priority = priority;
-   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
-   initial_thread->nice = NICE_DEFAULT;
+   t->recent_cpu = RECENT_CPU_DEFAULT;
+   t->nice = NICE_DEFAULT;
 
    t->magic = THREAD_MAGIC;
 
