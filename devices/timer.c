@@ -135,18 +135,18 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	if (thread_mlfqs)
 	{
 		mlfqs_increment();								/* timer_interrupt 마다 */
-		if (ticks%4 == 0)								/* intr 조정하려면 timer_ticks() */
+		if (timer_ticks()%4 == 0)								/* intr 조정하려면 timer_ticks() */
 		{
 			mlfqs_priority(thread_current());
 		}
-		if (ticks%TIMER_FREQ == 0)
+		if (timer_ticks()%TIMER_FREQ == 0)
 		{
 			mlfqs_recalc();
 			mlfqs_load_avg();
 		}
 	}
 
-	if (ticks == next_tick_to_interrupt)
+	if (timer_ticks() == next_tick_to_interrupt)
 	{
 		thread_awake(ticks);
 	}
