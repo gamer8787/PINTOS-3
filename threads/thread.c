@@ -886,8 +886,8 @@ void mlfqs_recalc(void)
       while (e != list_end(&all_list))
       {
          struct thread* b = list_entry(e, struct thread, all_elem);
-         mlfqs_priority(b);
          mlfqs_recent_cpu(b);
+		 mlfqs_priority(b);
          e = list_next(e);
       }   
       ASSERT (e == list_end(&all_list)) ;
