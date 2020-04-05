@@ -352,29 +352,65 @@ thread_get_priority (void) {
 }
 
 /* Sets the current thread's nice value to NICE. */
-void
-thread_set_nice (int nice UNUSED) {
-	/* TODO: Your implementation goes here */
+void thread_set_nice(int nice UNUSED) {
+   enum intr_level old_level;
+
+   ASSERT (!intr_context ());
+
+   old_level = intr_disable();
+
+   struct thread *curr = thread_current();
+
+   curr->nice = nice;
+   mlfqs_priority(curr); 
+   test_max_priority();
+
+   intr_set_level(old_level);
 }
+
 /* Returns the current thread's nice value. */
-int
-thread_get_nice (void) {
-	/* TODO: Your implementation goes here */
-	return 0;
+int thread_get_nice(void) {
+	enum intr_level old_level;
+
+	ASSERT (!intr_context ());
+
+	old_level = intr_disable();
+
+	int nice = thread_current()->nice;
+
+	intr_set_level(old_level);
+
+	return nice;
 }
 
 /* Returns 100 times the system load average. */
-int
-thread_get_load_avg (void) {
-	/* TODO: Your implementation goes here */
-	return 0;
+int thread_get_load_avg(void) {
+	enum intr_level old_level;
+
+	ASSERT (!intr_context ());
+
+	old_level = intr_disable();
+
+	int result = fp_to_int_round(mult_mixed(load_avg, 100));					/* 반환 형태가 int 인가 17.14인가 */
+
+	intr_set_level(old_level);
+
+	return result;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
-int
-thread_get_recent_cpu (void) {
-	/* TODO: Your implementation goes here */
-	return 0;
+int thread_get_recent_cpu(void) {
+	enum intr_level old_level;
+
+	ASSERT (!intr_context ());
+
+	old_level = intr_disable();
+
+	int result = fp_to_int_round(mult_mixed(thread_current()->recent_cpu,100));	/* 반환 형태가 int인가 17.14인가 */
+
+	intr_set_level(old_level);
+
+	return result;
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -866,62 +902,4 @@ void mlfqs_recalc (void) {
 			e = list_next(e);
 		}
 	}
-}
-
-void thread_set_nice(int nice UNUSED) {
-   enum intr_level old_level;
-
-   ASSERT (!intr_context ());
-
-   old_level = intr_disable();
-
-   struct thread *curr = thread_current();
-
-   curr->nice = nice;
-   mlfqs_priority(curr); 
-   test_max_priority();
-
-   intr_set_level(old_level);
-}
-
-int thread_get_nice(void) {
-	enum intr_level old_level;
-
-	ASSERT (!intr_context ());
-
-	old_level = intr_disable();
-
-	int nice = thread_current()->nice;
-
-	intr_set_level(old_level);
-
-	return nice;
-}
-
-int thread_get_load_avg(void) {
-	enum intr_level old_level;
-
-	ASSERT (!intr_context ());
-
-	old_level = intr_disable();
-
-	int result = fp_to_int_round(mult_mixed(load_avg, 100));					/* 반환 형태가 int 인가 17.14인가 */
-
-	intr_set_level(old_level);
-
-	return result;
-}
-
-int thread_get_recent_cpu(void) {
-	enum intr_level old_level;
-
-	ASSERT (!intr_context ());
-
-	old_level = intr_disable();
-
-	int result = fp_to_int_round(mult_mixed(thread_current()->recent_cpu,100));	/* 반환 형태가 int인가 17.14인가 */
-
-	intr_set_level(old_level);
-
-	return result;
 }
