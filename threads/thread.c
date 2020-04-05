@@ -305,7 +305,7 @@ void
 thread_exit(void) {
    ASSERT(!intr_context());
    list_remove(&thread_current()->all_elem);
-#ifdef USERPROG
+#ifdef USERPROGs
    process_cleanup();
 #endif
 
@@ -805,8 +805,8 @@ void refresh_priority(void) {
 
 int int_to_fp(int n) { return n * F; }                     //integer를fixed point로전환
 int fp_to_int_round(int x) {                           //FP를int로전환(반올림) 
-   if (x <= 0) return (x - F / 2) / F;                     //FP를int로전환(버림)
-   else return (x + F / 2) / F;
+   if (x >= 0) return (x + F / 2) / F;                     //FP를int로전환(버림)
+   else return (x - F / 2) / F;
 }               
 int fp_to_int(int x) { return x / F; }                     //FP를int로전환(버림)
 int add_fp(int x, int y) { return x + y; }                  //FP의덧셈
@@ -832,17 +832,17 @@ void mlfqs_priority(struct thread* t) {
 }
 
 int adjust_to_range(int p) {
-	if (p < PRI_MIN)
-	{
-		return PRI_MIN;
-	}
-	else if (p > PRI_MAX)
-	{
-		return PRI_MAX;
-	}
-	else {
-		return p;
-	}
+   if (p < PRI_MIN)
+   {
+      return PRI_MIN;
+   }
+   else if (p > PRI_MAX)
+   {
+      return PRI_MAX;
+   }
+   else {
+      return p;
+   }
 }
 
 
@@ -876,7 +876,6 @@ void mlfqs_increment(void)
    /* 해당스레드가idle_thread가아닌지검사*/
    /* 현재스레드의recent_cpu값을1증가시킨다. */
 }
-
 
 void mlfqs_recalc(void)
 {
