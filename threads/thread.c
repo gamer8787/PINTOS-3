@@ -133,8 +133,6 @@ thread_init(void) {
    /* Set up a thread structure for the running thread. */
    initial_thread = running_thread();
    init_thread(initial_thread, "main", PRI_DEFAULT);
-   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
-   initial_thread->nice = NICE_DEFAULT;
    initial_thread->status = THREAD_RUNNING;
    initial_thread->tid = allocate_tid();
 }
@@ -214,8 +212,6 @@ thread_create(const char* name, int priority,
 
    /* Initialize thread. */
    init_thread(t, name, priority);
-   t->recent_cpu = thread_current()->recent_cpu;
-   t->nice = thread_current()->nice;
    tid = t->tid = allocate_tid();
 
    /* Call the kernel_thread if it scheduled.
@@ -478,14 +474,25 @@ init_thread(struct thread* t, const char* name, int priority) {
    strlcpy(t->name, name, sizeof t->name);
    t->tf.rsp = (uint64_t)t + PGSIZE - sizeof(void*);
    t->priority = priority;
-   //t->recent_cpu = RECENT_CPU_DEFAULT;
-   //t->nice = NICE_DEFAULT;
 
    t->magic = THREAD_MAGIC;
 
    t->init_priority = priority;
    t->wait_on_lock = NULL;
    list_init(&t->donations);
+
+   if (thread_mlfqs)
+   {
+      if (t == init_thread)
+      {
+         t->nice = NICE_DEFAULT;
+         t->recent_cpu = RECENT_CPU_DEFAULT;
+      }
+      else {
+         t->nice = thread_get_nice();
+         t->recent_cpu = thread_current()->recent_cpu;
+      }
+   }
    //t->donation_elem = ?
 }
 
@@ -880,7 +887,7 @@ void mlfqs_increment(void)
    /* 현재스레드의recent_cpu값을1증가시킨다. */
 }
 
-void mlfqs_recalc(void)
+void mlfqs_recalc_recent_cpu(void)
 {
    struct list_elem* a = list_begin(&all_list);
    if (a != list_end(&all_list)) {
@@ -890,7 +897,23 @@ void mlfqs_recalc(void)
       {
          struct thread* b = list_entry(e, struct thread, all_elem);
          mlfqs_recent_cpu(b);
-		 mlfqs_priority(b);
+         e = list_next(e);
+      }   
+      ASSERT (e == list_end(&all_list)) ;
+   }
+   /* 모든thread의recent_cpu와priority값재계산한다. */
+}
+
+void mlfqs_recalc_priority(void)
+{
+   struct list_elem* a = list_begin(&all_list);
+   if (a != list_end(&all_list)) {
+      struct list_elem* e;
+      e = a;
+      while (e != list_end(&all_list))
+      {
+         struct thread* b = list_entry(e, struct thread, all_elem);
+		   mlfqs_priority(b);
          e = list_next(e);
       }   
       ASSERT (e == list_end(&all_list)) ;
