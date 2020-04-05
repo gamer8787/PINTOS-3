@@ -142,6 +142,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 		if (ticks%TIMER_FREQ == 0)
 		{
 			mlfqs_recalc();
+			mlfqs_load_avg();
 		}
 	}
 
