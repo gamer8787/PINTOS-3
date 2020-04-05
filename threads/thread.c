@@ -133,6 +133,8 @@ thread_init(void) {
    /* Set up a thread structure for the running thread. */
    initial_thread = running_thread();
    init_thread(initial_thread, "main", PRI_DEFAULT);
+   initial_thread->nice = NICE_DEFAULT;
+   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
    initial_thread->status = THREAD_RUNNING;
    initial_thread->tid = allocate_tid();
 }
@@ -212,6 +214,8 @@ thread_create(const char* name, int priority,
 
    /* Initialize thread. */
    init_thread(t, name, priority);
+   t->nice = thread_current()->nice;
+   t->recent_cpu = thread_current()->recent_cpu;
    tid = t->tid = allocate_tid();
 
    /* Call the kernel_thread if it scheduled.
@@ -481,18 +485,6 @@ init_thread(struct thread* t, const char* name, int priority) {
    t->wait_on_lock = NULL;
    list_init(&t->donations);
 
-   if (thread_mlfqs)
-   {
-      if (t == init_thread)
-      {
-         t->nice = NICE_DEFAULT;
-         t->recent_cpu = RECENT_CPU_DEFAULT;
-      }
-      else {
-         t->nice = thread_current()->nice;
-         t->recent_cpu = thread_current()->recent_cpu;
-      }
-   }
    //t->donation_elem = ?
 }
 
