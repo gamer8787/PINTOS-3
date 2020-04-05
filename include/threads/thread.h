@@ -88,6 +88,9 @@ struct thread {
 	char name[16];                      /* Name (for debugging purposes). */
 	int priority;                       /* Priority. */
 	int64_t wakeup_tick;				/* Wakeup_tick*/
+	int nice;
+	int recent_cpu;
+	struct list_elem all_elem;
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
@@ -151,5 +154,11 @@ void refresh_priority(void);
 
 void test_max_priority (void);									/* 현재 수행중인 스레드와 가장 높은 우선순위 스레드 비교하여 스케줄링 */
 bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED); /* 인자로 주어진 스레드들의 우선순위 비교 */
+
+void mlfqs_priority(struct thread *t);
+void mlfqs_recent_cpu(struct thread *t);
+void mlfqs_load_avg(void);
+void mlfqs_increment(void);
+void mlfqs_recalc(void);
 
 #endif /* threads/thread.h */

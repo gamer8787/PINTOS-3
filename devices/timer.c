@@ -130,8 +130,21 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
-
 	int64_t next_tick_to_interrupt = get_next_tick_to_awake();
+
+	if (thread_mlfqs)
+	{
+		mlfqs_increment();								/* timer_interrupt 마다 */
+		if (ticks%4 == 0)								/* intr 조정하려면 timer_ticks() */
+		{
+			mlfqs_priority(thread_current());
+		}
+		if (ticks%TIMER_FREQ == 0)
+		{
+			mlfqs_recalc();
+		}
+	}
+
 	if (ticks == next_tick_to_interrupt)
 	{
 		thread_awake(ticks);
