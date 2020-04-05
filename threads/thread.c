@@ -133,6 +133,7 @@ thread_init(void) {
    /* Set up a thread structure for the running thread. */
    initial_thread = running_thread();
    init_thread(initial_thread, "main", PRI_DEFAULT);
+   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
    initial_thread->status = THREAD_RUNNING;
    initial_thread->tid = allocate_tid();
 }
@@ -212,6 +213,7 @@ thread_create(const char* name, int priority,
 
    /* Initialize thread. */
    init_thread(t, name, priority);
+   t->recent_cpu = thread_current()->recent_cpu;
    tid = t->tid = allocate_tid();
 
    /* Call the kernel_thread if it scheduled.
@@ -863,9 +865,9 @@ void mlfqs_load_avg(void) {
    int b = div_mixed(int_to_fp(1), 60);  //(1/60)
    int ready_threads;
    if (thread_current() != idle_thread)
-      ready_threads = list_size(&ready_list) + 1;
+      ready_threads = ((int)list_size(&ready_list)) + 1;
    else
-      ready_threads = list_size(&ready_list);
+      ready_threads = (int)list_size(&ready_list);
    load_avg = add_fp(mult_fp(a, load_avg), mult_mixed(b, ready_threads));
 }
 
