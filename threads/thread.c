@@ -133,8 +133,8 @@ thread_init(void) {
    /* Set up a thread structure for the running thread. */
    initial_thread = running_thread();
    init_thread(initial_thread, "main", PRI_DEFAULT);
-   //initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
-   //initial_thread->nice = NICE_DEFAULT;
+   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
+   initial_thread->nice = NICE_DEFAULT;
    initial_thread->status = THREAD_RUNNING;
    initial_thread->tid = allocate_tid();
 }
@@ -214,8 +214,8 @@ thread_create(const char* name, int priority,
 
    /* Initialize thread. */
    init_thread(t, name, priority);
-   //t->recent_cpu = thread_current()->recent_cpu;
-   //t->nice = thread_current()->nice;
+   t->recent_cpu = thread_current()->recent_cpu;
+   t->nice = thread_current()->nice;
    tid = t->tid = allocate_tid();
 
    /* Call the kernel_thread if it scheduled.
@@ -478,8 +478,8 @@ init_thread(struct thread* t, const char* name, int priority) {
    strlcpy(t->name, name, sizeof t->name);
    t->tf.rsp = (uint64_t)t + PGSIZE - sizeof(void*);
    t->priority = priority;
-   t->recent_cpu = RECENT_CPU_DEFAULT + 1;
-   t->nice = NICE_DEFAULT;
+   //t->recent_cpu = RECENT_CPU_DEFAULT;
+   //t->nice = NICE_DEFAULT;
 
    t->magic = THREAD_MAGIC;
 
