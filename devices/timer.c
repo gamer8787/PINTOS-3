@@ -146,7 +146,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 		}
 	}
 
-	if (timer_ticks() == next_tick_to_interrupt)
+	if (timer_ticks() >= next_tick_to_interrupt)
 	{
 		thread_awake(ticks);
 	}
