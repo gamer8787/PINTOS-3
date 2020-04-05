@@ -198,16 +198,20 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
+	if (thread_mlfqs)
+	{
+		sema_down (&lock->semaphore);
+		lock->holder = thread_current();
+		return;
+	}
+
 	struct thread *curr = thread_current();
 
 	if (lock->holder != NULL)
 	{
 		curr->wait_on_lock = lock;
-		if (!thread_mlfqs)
-		{
-			list_push_front(&lock->holder->donations, &curr->donation_elem);				/* 이전상태의 우선순위 기억 */
-			donate_priority();
-		}
+		list_push_front(&lock->holder->donations, &curr->donation_elem);				/* 이전상태의 우선순위 기억 */
+		donate_priority();
 	}
 
 	sema_down (&lock->semaphore);
@@ -247,12 +251,15 @@ lock_release (struct lock *lock) {
 
 	lock->holder = NULL;
 
-	if (!thread_mlfqs)
+	if (thread_mlfqs)
 	{
-		remove_with_lock(lock);
-		refresh_priority();
+		sema_up (&lock->semaphore);
+		return;
 	}
-	
+
+	remove_with_lock(lock);
+	refresh_priority();
+
 	sema_up (&lock->semaphore);
 }
 
