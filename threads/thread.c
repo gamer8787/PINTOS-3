@@ -875,7 +875,14 @@ void mlfqs_recent_cpu (struct thread *t) {
 void mlfqs_load_avg(void) {
    int a = div_mixed(int_to_fp(59), 60); //(59/60)
    int b = div_mixed(int_to_fp(1), 60);  //(1/60)
-   int ready_threads = (int)list_size(&ready_list) + 1;
+   int ready_threads;
+   if (thread_current() == idle_thread)
+   {
+	   ready_threads = (int)list_size(&ready_list);
+   }
+   else {
+	   ready_threads = (int)list_size(&ready_list) + 1;
+   }
    load_avg = add_fp(mult_fp(a, load_avg), mult_mixed(b, ready_threads));
 }
 
