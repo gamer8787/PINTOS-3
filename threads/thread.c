@@ -133,10 +133,11 @@ thread_init(void) {
    /* Set up a thread structure for the running thread. */
    initial_thread = running_thread();
    init_thread(initial_thread, "main", PRI_DEFAULT);
-   initial_thread->nice = NICE_DEFAULT;
-   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
+   //initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
+   //initial_thread->nice = NICE_DEFAULT;
    initial_thread->status = THREAD_RUNNING;
    initial_thread->tid = allocate_tid();
+   list_push_back(&all_list, &initial_thread->all_elem);
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -214,8 +215,8 @@ thread_create(const char* name, int priority,
 
    /* Initialize thread. */
    init_thread(t, name, priority);
-   t->nice = thread_current()->nice;
-   t->recent_cpu = thread_current()->recent_cpu;
+   //t->recent_cpu = thread_current()->recent_cpu;
+   //t->nice = thread_current()->nice;
    tid = t->tid = allocate_tid();
 
    /* Call the kernel_thread if it scheduled.
@@ -230,6 +231,7 @@ thread_create(const char* name, int priority,
    t->tf.eflags = FLAG_IF;
 
    /* Add to run queue. */
+   list_push_back(&all_list, &t->all_elem);
    thread_unblock(t);
    test_max_priority();
 
@@ -477,15 +479,14 @@ init_thread(struct thread* t, const char* name, int priority) {
    strlcpy(t->name, name, sizeof t->name);
    t->tf.rsp = (uint64_t)t + PGSIZE - sizeof(void*);
    t->priority = priority;
+   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
+   initial_thread->nice = NICE_DEFAULT;
 
    t->magic = THREAD_MAGIC;
-
-   list_push_back(&all_list, &t->all_elem);
 
    t->init_priority = priority;
    t->wait_on_lock = NULL;
    list_init(&t->donations);
-
    //t->donation_elem = ?
 }
 
@@ -605,15 +606,15 @@ thread_launch(struct thread* th) {
  * It's not safe to call printf() in the schedule(). */
 static void
 do_schedule(int status) {
-	ASSERT (intr_get_level () == INTR_OFF);
-	ASSERT (thread_current()->status == THREAD_RUNNING);
-	while (!list_empty (&destruction_req)) {
-		struct thread *victim =
-			list_entry (list_pop_front (&destruction_req), struct thread, elem);
-		palloc_free_page(victim);
-	}
-	thread_current ()->status = status;
-	schedule ();
+   ASSERT (intr_get_level () == INTR_OFF);
+   ASSERT (thread_current()->status == THREAD_RUNNING);
+   while (!list_empty (&destruction_req)) {
+      struct thread *victim =
+         list_entry (list_pop_front (&destruction_req), struct thread, elem);
+      palloc_free_page(victim);
+   }
+   thread_current ()->status = status;
+   schedule ();
 }
 
 static void
@@ -882,88 +883,18 @@ void mlfqs_increment(void)
 
 void mlfqs_recalc(void)
 {
-   struct list_elem* a = list_begin(&ready_list);
-   if (a != list_end(&ready_list)) {
+   struct list_elem* a = list_begin(&all_list);
+   if (a != list_end(&all_list)) {
       struct list_elem* e;
       e = a;
-      while (e != list_end(&ready_list))
+      while (e != list_end(&all_list))
       {
-         struct thread* b = list_entry(e, struct thread, elem);
+         struct thread* b = list_entry(e, struct thread, all_elem);
          mlfqs_recent_cpu(b);
          mlfqs_priority(b);
          e = list_next(e);
       }   
-      ASSERT (e == list_end(&ready_list)) ;
-   }
-
-   a = list_begin(&sleep_list);
-   if (a != list_end(&sleep_list)) {
-      struct list_elem* e;
-      e = a;
-      while (e != list_end(&sleep_list))
-      {
-         struct thread* b = list_entry(e, struct thread, elem);
-         mlfqs_recent_cpu(b);
-         mlfqs_priority(b);
-         e = list_next(e);
-      }   
-      ASSERT (e == list_end(&sleep_list)) ;
-   }
-
-      a = thread_current();
-      mlfqs_recent_cpu(a);
-      mlfqs_priority(a);
-   /* 모든thread의recent_cpu와priority값재계산한다. */
-}
-
-void mlfqs_recalc_all(void)
-{
-   struct list_elem* a = list_begin(&all_list);
-   if (a != list_end(&all_list)) {
-      struct list_elem* e;
-      e = a;
-      while (e != list_end(&all_list))
-      {
-         struct thread* b = list_entry(e, struct thread, all_elem);
-         mlfqs_recent_cpu(b);
-		   mlfqs_priority(b);
-         e = list_next(e);
-      }   
       ASSERT (e == list_end(&all_list)) ;
    }
    /* 모든thread의recent_cpu와priority값재계산한다. */
-}
-
-
-void mlfqs_recalc_priority(void)
-{
-   struct list_elem* a = list_begin(&all_list);
-   if (a != list_end(&all_list)) {
-      struct list_elem* e;
-      e = a;
-      while (e != list_end(&all_list))
-      {
-         struct thread* b = list_entry(e, struct thread, all_elem);
-		   mlfqs_priority(b);
-         e = list_next(e);
-      }   
-      ASSERT (e == list_end(&all_list)) ;
-   }
-   /* 모든thread의recent_cpu와priority값재계산한다. */
-}
-
-void mlfqs_recalc_recent_cpu(void)
-{
-   struct list_elem* a = list_begin(&all_list);
-   if (a != list_end(&all_list)) {
-      struct list_elem* e;
-      e = a;
-      while (e != list_end(&all_list))
-      {
-         struct thread* b = list_entry(e, struct thread, all_elem);
-         mlfqs_recent_cpu(b);
-         e = list_next(e);
-      }   
-      ASSERT (e == list_end(&all_list)) ;
-   }
 }
