@@ -908,11 +908,11 @@ void mlfqs_recalc(void)
          e = list_next(e);
       }   
       ASSERT (e == list_end(&sleep_list)) ;
+   }
 
       a = thread_current();
       mlfqs_recent_cpu(a);
       mlfqs_priority(a);
-   }
    /* 모든thread의recent_cpu와priority값재계산한다. */
 }
 

@@ -136,7 +136,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	{
 		if (timer_ticks() >= next_tick_to_interrupt)
 		{
-		mlfqs_increment();
+			mlfqs_increment();
 		}
 		if (timer_ticks()%TIMER_FREQ == 0)
 		{
