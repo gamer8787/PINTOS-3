@@ -138,10 +138,10 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 		if (timer_ticks()%TIMER_FREQ == 0)
 		{
 			mlfqs_load_avg();
-			mlfqs_recalc_recent_cpu();
+			mlfqs_recalc();
 			//mlfqs_recalc();
 		}
-		if (timer_ticks()%4 == 0)								/* intr 조정하려면 timer_ticks() */
+		else if (timer_ticks()%4 == 0)								/* intr 조정하려면 timer_ticks() */
 		{
 			//mlfqs_priority(thread_current());
 			mlfqs_recalc_priority();
