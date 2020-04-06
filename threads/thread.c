@@ -230,7 +230,6 @@ thread_create(const char* name, int priority,
    t->tf.eflags = FLAG_IF;
 
    /* Add to run queue. */
-   list_push_back(&all_list, &t->all_elem);
    thread_unblock(t);
    test_max_priority();
 
@@ -480,6 +479,8 @@ init_thread(struct thread* t, const char* name, int priority) {
    t->priority = priority;
 
    t->magic = THREAD_MAGIC;
+
+   list_push_back(&all_list, &t->all_elem);
 
    t->init_priority = priority;
    t->wait_on_lock = NULL;
