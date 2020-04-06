@@ -134,7 +134,10 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 
 	if (thread_mlfqs)
 	{
-		mlfqs_increment();								/* timer_interrupt 마다 */
+		if (timer_ticks() >= next_tick_to_interrupt)
+		{
+		mlfqs_increment();
+		}
 		if (timer_ticks()%TIMER_FREQ == 0)
 		{
 			mlfqs_load_avg();
