@@ -933,7 +933,7 @@ void mlfqs_recalc_priority(void)
    /* 모든thread의recent_cpu와priority값재계산한다. */
 }
 
-void mlfqs_recalc(void)
+void mlfqs_recalc_recent_cpu(void)
 {
    struct list_elem* a = list_begin(&all_list);
    if (a != list_end(&all_list)) {
@@ -943,7 +943,6 @@ void mlfqs_recalc(void)
       {
          struct thread* b = list_entry(e, struct thread, all_elem);
          mlfqs_recent_cpu(b);
-         mlfqs_priority(b);
          e = list_next(e);
       }   
       ASSERT (e == list_end(&all_list)) ;
