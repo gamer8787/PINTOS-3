@@ -144,7 +144,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 		else if (timer_ticks()%4 == 0)								/* intr 조정하려면 timer_ticks() */
 		{
 			//mlfqs_priority(thread_current());
-			mlfqs_recalc_priority();
+			mlfqs_priority(thread_current());
 		}
 	}
 

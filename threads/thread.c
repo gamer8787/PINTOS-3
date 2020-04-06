@@ -880,19 +880,38 @@ void mlfqs_increment(void)
    /* 현재스레드의recent_cpu값을1증가시킨다. */
 }
 
-void mlfqs_recalc_recent_cpu(void)
+void mlfqs_recalc(void)
 {
-   struct list_elem* a = list_begin(&all_list);
-   if (a != list_end(&all_list)) {
+   struct list_elem* a = list_begin(&ready_list);
+   if (a != list_end(&ready_list)) {
       struct list_elem* e;
       e = a;
-      while (e != list_end(&all_list))
+      while (e != list_end(&ready_list))
       {
-         struct thread* b = list_entry(e, struct thread, all_elem);
+         struct thread* b = list_entry(e, struct thread, elem);
          mlfqs_recent_cpu(b);
+         mlfqs_priority(b);
          e = list_next(e);
       }   
-      ASSERT (e == list_end(&all_list)) ;
+      ASSERT (e == list_end(&ready_list)) ;
+   }
+
+   a = list_begin(&sleep_list);
+   if (a != list_end(&sleep_list)) {
+      struct list_elem* e;
+      e = a;
+      while (e != list_end(&sleep_list))
+      {
+         struct thread* b = list_entry(e, struct thread, elem);
+         mlfqs_recent_cpu(b);
+         mlfqs_priority(b);
+         e = list_next(e);
+      }   
+      ASSERT (e == list_end(&sleep_list)) ;
+
+      a = thread_current();
+      mlfqs_recent_cpu(a);
+      mlfqs_priority(a);
    }
    /* 모든thread의recent_cpu와priority값재계산한다. */
 }
