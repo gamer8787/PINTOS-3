@@ -310,9 +310,8 @@ void
 thread_exit(void) {
    ASSERT(!intr_context());
    list_remove(&thread_current()->all_elem);
-#ifdef USERPROGs
-   process_cleanup();
-
+#ifdef USERPROG
+   process_exit();
 #endif
 
    /* Just set our status to dying and schedule another process.
