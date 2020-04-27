@@ -53,6 +53,7 @@ process_create_initd (const char *file_name) {
 	strlcpy (fn_copy, file_name, PGSIZE);
 
 	token = strtok_r(fn_copy, " ", &save_ptr);
+	printf("%s\n", token);
 
 	/* Create a new thread to execute FILE_NAME. */
 	tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
@@ -179,6 +180,8 @@ process_exec (void *f_name) {
 
 	/* We first kill the current context */
 	process_cleanup ();
+
+	printf("%s\n", file_name);
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
