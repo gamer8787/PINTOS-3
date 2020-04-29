@@ -53,7 +53,6 @@ process_create_initd (const char *file_name) {
 	strlcpy (fn_copy, file_name, PGSIZE);
 
 	token = strtok_r(fn_copy, " ", &save_ptr);
-	printf("%s\n", token);
 
 	/* Create a new thread to execute FILE_NAME. */
 	tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
@@ -180,8 +179,6 @@ process_exec (void *f_name) {
 
 	/* We first kill the current context */
 	process_cleanup ();
-
-	printf("%s\n", file_name);
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
@@ -329,107 +326,158 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
  * Returns true if successful, false otherwise. */
 static bool
 load (const char *file_name, struct intr_frame *if_) {
-	struct thread *t = thread_current ();
-	struct ELF ehdr;
-	struct file *file = NULL;
-	off_t file_ofs;
-	bool success = false;
-	int i;
+   struct thread *t = thread_current ();
+   struct ELF ehdr;
+   struct file *file = NULL;
+   off_t file_ofs;
+   bool success = false;
+   int i;
 
-	/* Allocate and activate page directory. */
-	t->pml4 = pml4_create ();
-	if (t->pml4 == NULL)
-		goto done;
-	process_activate (thread_current ());
+   /* Allocate and activate page directory. */
+   t->pml4 = pml4_create ();
+   if (t->pml4 == NULL)
+      goto done;
+   process_activate (thread_current ());   
 
-	/* Open executable file. */
-	file = filesys_open (file_name);
-	if (file == NULL) {
-		printf ("load: %s: open failed\n", file_name);
-		goto done;
+   char* file_copy;
+   char* token, * save_ptr;
+
+   file_copy = palloc_get_page(0);
+   if (file_copy == NULL)
+      return TID_ERROR;
+   strlcpy(file_copy, file_name, PGSIZE);
+
+   token = strtok_r(file_copy, " ", &save_ptr);
+
+   /* Open executable file. */
+   file = filesys_open (token); // -> token
+   if (file == NULL) {
+      printf ("load: %s: open failed\n", token); //file_name -> token
+      goto done;
+   }
+
+   /* Read and verify executable header. */
+   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
+         || memcmp (ehdr.e_ident, "\177ELF\2\1\1", 7)
+         || ehdr.e_type != 2
+         || ehdr.e_machine != 0x3E // amd64
+         || ehdr.e_version != 1
+         || ehdr.e_phentsize != sizeof (struct Phdr)
+         || ehdr.e_phnum > 1024) {
+      printf ("load: %s: error loading executable\n", file_name);
+      goto done;
+   }
+
+   /* Read program headers. */
+   file_ofs = ehdr.e_phoff;
+   for (i = 0; i < ehdr.e_phnum; i++) {
+      struct Phdr phdr;
+
+      if (file_ofs < 0 || file_ofs > file_length (file))
+         goto done;
+      file_seek (file, file_ofs);
+
+      if (file_read (file, &phdr, sizeof phdr) != sizeof phdr)
+         goto done;
+      file_ofs += sizeof phdr;
+      switch (phdr.p_type) {
+         case PT_NULL:
+         case PT_NOTE:
+         case PT_PHDR:
+         case PT_STACK:
+         default:
+            /* Ignore this segment. */
+            break;
+         case PT_DYNAMIC:
+         case PT_INTERP:
+         case PT_SHLIB:
+            goto done;
+         case PT_LOAD:
+            if (validate_segment (&phdr, file)) {
+               bool writable = (phdr.p_flags & PF_W) != 0;
+               uint64_t file_page = phdr.p_offset & ~PGMASK;
+               uint64_t mem_page = phdr.p_vaddr & ~PGMASK;
+               uint64_t page_offset = phdr.p_vaddr & PGMASK;
+               uint32_t read_bytes, zero_bytes;
+               if (phdr.p_filesz > 0) {
+                  /* Normal segment.
+                   * Read initial part from disk and zero the rest. */
+                  read_bytes = page_offset + phdr.p_filesz;
+                  zero_bytes = (ROUND_UP (page_offset + phdr.p_memsz, PGSIZE)
+                        - read_bytes);
+               } else {
+                  /* Entirely zero.
+                   * Don't read anything from disk. */
+                  read_bytes = 0;
+                  zero_bytes = ROUND_UP (page_offset + phdr.p_memsz, PGSIZE);
+               }
+               if (!load_segment (file, file_page, (void *) mem_page,
+                        read_bytes, zero_bytes, writable))
+                  goto done;
+            }
+            else
+               goto done;
+            break;
+      }
+   }
+
+   /* Set up stack. */
+   if (!setup_stack (if_))
+      goto done;
+
+   /* Start address. */
+   if_->rip = ehdr.e_entry;
+
+   /* TODO: Your code goes here.
+    * TODO: Implement argument passing (see project2/argument_passing.html). */
+   char* parse[64] = { NULL, };
+   parse[0] = token;
+   int a = 1;
+
+   while (token != NULL) {
+      token = strtok_r(NULL, " ", &save_ptr);
+      parse[a] = token;
+      a++;
 	}
 
-	/* Read and verify executable header. */
-	if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
-			|| memcmp (ehdr.e_ident, "\177ELF\2\1\1", 7)
-			|| ehdr.e_type != 2
-			|| ehdr.e_machine != 0x3E // amd64
-			|| ehdr.e_version != 1
-			|| ehdr.e_phentsize != sizeof (struct Phdr)
-			|| ehdr.e_phnum > 1024) {
-		printf ("load: %s: error loading executable\n", file_name);
-		goto done;
+	int lensum = 0;
+	void** rsp = &if_->rsp;
+	for (int i = a - 2; i > -1; i--) {
+    	for (int j = strlen(parse[i]); j > -1; j--) {
+        	*rsp = *rsp - 1;
+        	**(char**)rsp = parse[i][j];
+    	}
+
+		lensum += strlen(parse[i]) + 1;
+		parse[i] = *rsp;
 	}
 
-	/* Read program headers. */
-	file_ofs = ehdr.e_phoff;
-	for (i = 0; i < ehdr.e_phnum; i++) {
-		struct Phdr phdr;
-
-		if (file_ofs < 0 || file_ofs > file_length (file))
-			goto done;
-		file_seek (file, file_ofs);
-
-		if (file_read (file, &phdr, sizeof phdr) != sizeof phdr)
-			goto done;
-		file_ofs += sizeof phdr;
-		switch (phdr.p_type) {
-			case PT_NULL:
-			case PT_NOTE:
-			case PT_PHDR:
-			case PT_STACK:
-			default:
-				/* Ignore this segment. */
-				break;
-			case PT_DYNAMIC:
-			case PT_INTERP:
-			case PT_SHLIB:
-				goto done;
-			case PT_LOAD:
-				if (validate_segment (&phdr, file)) {
-					bool writable = (phdr.p_flags & PF_W) != 0;
-					uint64_t file_page = phdr.p_offset & ~PGMASK;
-					uint64_t mem_page = phdr.p_vaddr & ~PGMASK;
-					uint64_t page_offset = phdr.p_vaddr & PGMASK;
-					uint32_t read_bytes, zero_bytes;
-					if (phdr.p_filesz > 0) {
-						/* Normal segment.
-						 * Read initial part from disk and zero the rest. */
-						read_bytes = page_offset + phdr.p_filesz;
-						zero_bytes = (ROUND_UP (page_offset + phdr.p_memsz, PGSIZE)
-								- read_bytes);
-					} else {
-						/* Entirely zero.
-						 * Don't read anything from disk. */
-						read_bytes = 0;
-						zero_bytes = ROUND_UP (page_offset + phdr.p_memsz, PGSIZE);
-					}
-					if (!load_segment (file, file_page, (void *) mem_page,
-								read_bytes, zero_bytes, writable))
-						goto done;
-				}
-				else
-					goto done;
-				break;
-		}
+	int x = (8- (lensum % 8)) % 8;
+	for (int i = 0; i < x; i++) {
+		*rsp = *rsp - 1;
+		**(uint8_t**)rsp = 0;
 	}
 
-	/* Set up stack. */
-	if (!setup_stack (if_))
-		goto done;
+	*rsp = *rsp - 8;
+	**(char***)rsp = 0;
 
-	/* Start address. */
-	if_->rip = ehdr.e_entry;
+	for (int i = a - 2; i > -1; i--) {
+		*rsp = *rsp - 8;
+		**(char***)rsp = parse[i];
+	}
 
-	/* TODO: Your code goes here.
-	 * TODO: Implement argument passing (see project2/argument_passing.html). */
+	if_->R.rdi = a - 1;
+	if_->R.rsi = *rsp;
 
-	success = true;
+	*rsp = *rsp - 8;
+	**(void***)rsp = 0;
 
+	palloc_free_page(file_copy);
+	
 done:
-	/* We arrive here whether the load is successful or not. */
-	file_close (file);
-	return success;
+   /* We arrive here whether the load is successful or not. */
+   file_close (file);
+   return success;
 }
 
 
@@ -643,3 +691,9 @@ setup_stack (struct intr_frame *if_) {
 	return success;
 }
 #endif /* VM */
+
+void argument_stack(char **parse, int count, void **rsp)
+{
+	
+
+}
