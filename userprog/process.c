@@ -188,6 +188,8 @@ process_exec (void *f_name) {
 	if (!success)
 		return -1;
 
+	hex_dump(_if.rsp,_if.rsp,LOADER_PHYS_BASE - _if.rsp, true);
+
 	/* Start switched process. */
 	do_iret (&_if);
 	NOT_REACHED ();
@@ -473,7 +475,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	**(void***)rsp = 0;
 
 	palloc_free_page(file_copy);
-	
+
 done:
    /* We arrive here whether the load is successful or not. */
    file_close (file);
