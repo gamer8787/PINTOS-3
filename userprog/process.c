@@ -353,8 +353,6 @@ load (const char *file_name, struct intr_frame *if_) {
       	a++;
 	}
 
-	printf("%s\n", parse[0]);
-
    	/* Open executable file. */
    	file = filesys_open (parse[0]); // -> token
    	if (file == NULL) {
