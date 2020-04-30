@@ -181,6 +181,8 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	printf("process_exec : %s\n", file_name);
+
 	/* And then load the binary */
 	success = load (file_name, &_if);
 
@@ -348,7 +350,11 @@ load (const char *file_name, struct intr_frame *if_) {
       return TID_ERROR;
    strlcpy(file_copy, file_name, PGSIZE);
 
+   printf("load : %s\n", file_copy);
+
    token = strtok_r(file_copy, " ", &save_ptr);
+
+   printf("load first toekn : %s\n", token);
 
    /* Open executable file. */
    file = filesys_open (token); // -> token
