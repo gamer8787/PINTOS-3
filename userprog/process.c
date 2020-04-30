@@ -471,8 +471,8 @@ load (const char *file_name, struct intr_frame *if_) {
 	*rsp = *rsp - 8;
 	**(void***)rsp = 0;
 
-	hex_dump(if_->rsp, if_->rsp, LOADER_PHYS_BASE - if_->rsp, true);
-
+	printf("%s\n", *(char *)(*rsp + 33));
+	printf("%s\n", *(char *)(*rsp + 38));
 done:
    /* We arrive here whether the load is successful or not. */
    file_close (file);
