@@ -55,6 +55,7 @@ process_create_initd (const char *file_name) {
 	token = strtok_r(fn_copy, " ", &save_ptr);
 
 	/* Create a new thread to execute FILE_NAME. */
+	printf("thread created : %s\n", token);
 	tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
 	if (tid == TID_ERROR)
 		palloc_free_page (fn_copy);
@@ -438,6 +439,11 @@ load (const char *file_name, struct intr_frame *if_) {
       token = strtok_r(NULL, " ", &save_ptr);
       parse[a] = token;
       a++;
+	}
+
+	for (i = 0; i < a - 1; i++)
+	{
+		printf("load : %s\n", parse[i]);
 	}
 
 	int lensum = 0;
