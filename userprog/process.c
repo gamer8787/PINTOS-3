@@ -52,21 +52,18 @@ process_create_initd (const char *file_name) {
 		return TID_ERROR;
 	strlcpy (fn_copy, file_name, PGSIZE);
 
-	token = strtok_r(fn_copy, " ", &save_ptr);
+	//token = strtok_r(fn_copy, " ", &save_ptr);
 
 	/* Create a new thread to execute FILE_NAME. */
-	printf("thread created : %s\n", token);
-	//printf("thread create : %s\n", fn_copy);
-	tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
-	//tid = thread_create(fn_copy, PRI_DEFAULT, initd, fn_copy);
+	tid = thread_create (file_name, PRI_DEFAULT, initd, fn_copy);
+	
 	if (tid == TID_ERROR)
 	{
 		palloc_free_page (fn_copy);
-		printf("create fail : %s\n", token);
-		//printf("create fail : %s\n", fn_copy);
+		printf("create fail : %s\n", file_name);
+		
 	}
-	printf("create complete : %s\n", token);
-	//printf("create complete : %s\n", fn_copy);
+	printf("create complete : %s\n", file_name);
 	return tid;
 }
 
@@ -179,7 +176,6 @@ process_exec (void *f_name) {
 	char *file_name = f_name;
 	bool success;
 	
-	printf("process_exec 1st : %s\n", file_name);
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
 	 * it stores the execution information to the member. */
@@ -190,8 +186,6 @@ process_exec (void *f_name) {
 
 	/* We first kill the current context */
 	process_cleanup ();
-
-	printf("process_exec : %s\n", file_name);
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
