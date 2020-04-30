@@ -184,7 +184,6 @@ process_exec (void *f_name) {
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
-	PANIC("load done\n");
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
@@ -354,11 +353,8 @@ load (const char *file_name, struct intr_frame *if_) {
       	a++;
 	}
 
-	printf("%s\n", parse[0]);
-
    	/* Open executable file. */
    	file = filesys_open (parse[0]); // -> token
-	printf("%s\n", parse[0]);
 	
    	if (file == NULL) {
       	printf ("load: %s: open failed\n", parse[0]); //file_name -> token
