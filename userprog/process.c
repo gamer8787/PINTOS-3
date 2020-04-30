@@ -353,16 +353,13 @@ load (const char *file_name, struct intr_frame *if_) {
       	a++;
 	}
 
-	for (int i = 0; i < a - 1; i ++)
-	{
-		printf("|%s|\n",parse[i]);
-	}
-
    	/* Open executable file. */
-   	file = filesys_open (parse[0]); // -> token
+   	file = filesys_open (file_name); // -> token
+
+	printf("load file open\n");
 	
    	if (file == NULL) {
-      	printf ("load: %s: open failed\n", parse[0]); //file_name -> token
+      	printf ("load: %s: open failed\n", file_name); //file_name -> token
       	goto done;
    	}
 
