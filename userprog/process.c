@@ -184,7 +184,6 @@ process_exec (void *f_name) {
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
-	hex_dump(_if.rsp, _if.rsp, LOADER_PHYS_BASE - _if.rsp, true);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
@@ -471,6 +470,8 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	*rsp = *rsp - 8;
 	**(void***)rsp = 0;
+
+	hex_dump(if_->rsp, if_->rsp, LOADER_PHYS_BASE - if_->rsp, true);
 
 done:
    /* We arrive here whether the load is successful or not. */
