@@ -439,7 +439,8 @@ load (const char *file_name, struct intr_frame *if_) {
 
    /* TODO: Your code goes here.
     * TODO: Implement argument passing (see project2/argument_passing.html). */
-   int lensum = 0;
+	printf("abc\n");
+    int lensum = 0;
 	void** rsp = &if_->rsp;
 	for (int i = a - 2; i > -1; i--) {
     	for (int j = strlen(parse[i]); j > -1; j--) {
@@ -470,9 +471,6 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	*rsp = *rsp - 8;
 	**(void***)rsp = 0;
-	printf("here i am \n");
-	printf("%s\n", *(char *)(*rsp + 33));
-	printf("%s\n", *(char *)(*rsp + 38));
 done:
    /* We arrive here whether the load is successful or not. */
    file_close (file);
