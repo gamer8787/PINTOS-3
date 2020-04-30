@@ -354,7 +354,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	}
 
    	/* Open executable file. */
-   	file = filesys_open (file_name); // -> token
+   	file = filesys_open(file_name); // -> token
 
 	printf("load file open\n");
 	
@@ -471,6 +471,8 @@ load (const char *file_name, struct intr_frame *if_) {
 	**(void***)rsp = 0;
 
 	hex_dump(if_->rsp, if_->rsp, USER_STACK - if_->rsp, true);
+
+	success = true;
 done:
    /* We arrive here whether the load is successful or not. */
    file_close (file);
