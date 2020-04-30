@@ -470,7 +470,7 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	*rsp = *rsp - 8;
 	**(void***)rsp = 0;
-
+	printf("here i am \n");
 	printf("%s\n", *(char *)(*rsp + 33));
 	printf("%s\n", *(char *)(*rsp + 38));
 done:
