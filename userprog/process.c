@@ -185,6 +185,8 @@ process_exec (void *f_name) {
 	/* And then load the binary */
 	success = load (file_name, &_if);
 
+
+
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
@@ -353,10 +355,10 @@ load (const char *file_name, struct intr_frame *if_) {
       a++;
 	}
 
-	for (i = 0; i < a - 1; i++)
-	{
-		printf("load iter parse : %s\n", parse[i]);
-	}
+	//for (i = 0; i < a - 1; i++)
+	//{
+	//	printf("load iter parse : %s\n", parse[i]);
+	//}
    
    /* Open executable file. */
    file = filesys_open (parse[0]); // -> token
