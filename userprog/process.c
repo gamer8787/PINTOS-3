@@ -353,6 +353,11 @@ load (const char *file_name, struct intr_frame *if_) {
       	a++;
 	}
 
+	for (int i = 0; i < a - 1; i ++)
+	{
+		printf("|%s|\n",parse[i]);
+	}
+
    	/* Open executable file. */
    	file = filesys_open (parse[0]); // -> token
 	
