@@ -52,18 +52,18 @@ process_create_initd (const char *file_name) {
 		return TID_ERROR;
 	strlcpy (fn_copy, file_name, PGSIZE);
 
-	//token = strtok_r(fn_copy, " ", &save_ptr);
+	token = strtok_r(file_name, " ", &save_ptr);
 
 	/* Create a new thread to execute FILE_NAME. */
-	tid = thread_create (file_name, PRI_DEFAULT, initd, fn_copy);
+	tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
 	
 	if (tid == TID_ERROR)
 	{
 		palloc_free_page (fn_copy);
-		printf("create fail : %s\n", file_name);
+		printf("create fail : %s\n", token);
 		
 	}
-	printf("create complete : %s\n", file_name);
+	printf("create complete : %s\n", token);
 	return tid;
 }
 
@@ -346,19 +346,13 @@ load (const char *file_name, struct intr_frame *if_) {
       goto done;
    process_activate (thread_current ());   
 
-   char* file_copy;
    char* token, * save_ptr;
 
-   file_copy = palloc_get_page(0);
-   if (file_copy == NULL)
-      return TID_ERROR;
-   strlcpy(file_copy, file_name, PGSIZE);
+   printf("load : %s\n", file_name);
 
-   printf("load : %s\n", file_copy);
+   token = strtok_r(file_name, " ", &save_ptr);
 
-   token = strtok_r(file_copy, " ", &save_ptr);
-
-   printf("load first toekn : %s\n", token);
+   printf("load first token : %s\n", token);
 
    /* Open executable file. */
    file = filesys_open (token); // -> token
@@ -488,7 +482,6 @@ load (const char *file_name, struct intr_frame *if_) {
 	*rsp = *rsp - 8;
 	**(void***)rsp = 0;
 
-	palloc_free_page(file_copy);
 done:
    /* We arrive here whether the load is successful or not. */
    file_close (file);
