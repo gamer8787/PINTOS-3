@@ -68,6 +68,7 @@ initd (void *f_name) {
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
+	printf("initd : %s\n", f_name);
 
 	process_init ();
 
