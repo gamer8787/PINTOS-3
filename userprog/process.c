@@ -357,6 +357,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	{
 		printf("load iter parse : %s\n", parse[i]);
 	}
+	printf("load1\n");
    
    /* Open executable file. */
    file = filesys_open (parse[0]); // -> token
@@ -437,9 +438,10 @@ load (const char *file_name, struct intr_frame *if_) {
    /* Start address. */
    if_->rip = ehdr.e_entry;
 
+   printf("load2\n");
+
    /* TODO: Your code goes here.
     * TODO: Implement argument passing (see project2/argument_passing.html). */
-	printf("abc\n");
     int lensum = 0;
 	void** rsp = &if_->rsp;
 	for (int i = a - 2; i > -1; i--) {
