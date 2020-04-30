@@ -357,7 +357,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	{
 		printf("load iter parse : %s\n", parse[i]);
 	}
-	printf("load1\n");
+	printf("load123\n");
    
    /* Open executable file. */
    file = filesys_open (parse[0]); // -> token
