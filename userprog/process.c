@@ -360,6 +360,8 @@ load (const char *file_name, struct intr_frame *if_) {
       a++;
 	}
 
+	printf("%d\n", a);
+
 	for (i = 0; i < a - 1; i++)
 	{
 		printf("load iter parse : %s\n", parse[i]);
