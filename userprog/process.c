@@ -366,6 +366,8 @@ load (const char *file_name, struct intr_frame *if_) {
       goto done;
    }
 
+   printf("load2\n");
+
    /* Read and verify executable header. */
    if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
          || memcmp (ehdr.e_ident, "\177ELF\2\1\1", 7)
@@ -377,6 +379,8 @@ load (const char *file_name, struct intr_frame *if_) {
       printf ("load: %s: error loading executable\n", file_name);
       goto done;
    }
+
+   printf("load3\n");
 
    /* Read program headers. */
    file_ofs = ehdr.e_phoff;
@@ -431,6 +435,8 @@ load (const char *file_name, struct intr_frame *if_) {
       }
    }
 
+   printf("load4\n");
+
    /* Set up stack. */
    if (!setup_stack (if_))
       goto done;
@@ -438,7 +444,7 @@ load (const char *file_name, struct intr_frame *if_) {
    /* Start address. */
    if_->rip = ehdr.e_entry;
 
-   printf("load2\n");
+   printf("load5\n");
 
    /* TODO: Your code goes here.
     * TODO: Implement argument passing (see project2/argument_passing.html). */
