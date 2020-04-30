@@ -184,7 +184,7 @@ process_exec (void *f_name) {
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
-	printf("load done in exec\n");
+	PANIC("load done\n");
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
