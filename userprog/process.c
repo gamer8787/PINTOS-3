@@ -182,13 +182,12 @@ process_exec (void *f_name) {
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
+	hex_dump(_if.rsp,_if.rsp,LOADER_PHYS_BASE - _if.rsp, true);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
 		return -1;
-
-	hex_dump(_if.rsp,_if.rsp,LOADER_PHYS_BASE - _if.rsp, true);
 
 	/* Start switched process. */
 	do_iret (&_if);
