@@ -335,13 +335,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	bool success = false;
 	int i;
 
-	/* Allocate and activate page directory. */
-	t->pml4 = pml4_create ();
-	if (t->pml4 == NULL)
-    	goto done;
-   	process_activate (thread_current ());   
-
-   	char* token, * save_ptr;
+	char* token, * save_ptr;
    	char* parse[64] = { NULL, };
    	token = strtok_r(file_name, " ", &save_ptr);
    	parse[0] = token;
@@ -352,6 +346,12 @@ load (const char *file_name, struct intr_frame *if_) {
       	parse[a] = token;
       	a++;
 	}
+
+	/* Allocate and activate page directory. */
+	t->pml4 = pml4_create ();
+	if (t->pml4 == NULL)
+    	goto done;
+   	process_activate (thread_current ());   
 
    	/* Open executable file. */
    	file = filesys_open(file_name); // -> token
