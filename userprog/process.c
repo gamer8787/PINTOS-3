@@ -52,28 +52,27 @@ process_create_initd (const char *file_name) {
 		return TID_ERROR;
 	strlcpy (fn_copy, file_name, PGSIZE);
 
-	//token = strtok_r(fn_copy, " ", &save_ptr);
+	token = strtok_r(fn_copy, " ", &save_ptr);
 
 	/* Create a new thread to execute FILE_NAME. */
-	//printf("thread created : %s\n", token);
-	printf("thread create : %s\n", fn_copy);
-	//tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
-	tid = thread_create(fn_copy, PRI_DEFAULT, initd, fn_copy);
+	printf("thread created : %s\n", token);
+	//printf("thread create : %s\n", fn_copy);
+	tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
+	//tid = thread_create(fn_copy, PRI_DEFAULT, initd, fn_copy);
 	if (tid == TID_ERROR)
 	{
 		palloc_free_page (fn_copy);
-		//printf("create fail : %s\n", token);
-		printf("create fail : %s\n", fn_copy);
+		printf("create fail : %s\n", token);
+		//printf("create fail : %s\n", fn_copy);
 	}
-	//printf("create complete : %s\n", token);
-	printf("create complete : %s\n", fn_copy);
+	printf("create complete : %s\n", token);
+	//printf("create complete : %s\n", fn_copy);
 	return tid;
 }
 
 /* A thread function that launches first user process. */
 static void
 initd (void *f_name) {
-	PANIC("reach here");
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
