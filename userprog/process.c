@@ -60,10 +60,7 @@ process_create_initd (const char *file_name) {
 	if (tid == TID_ERROR)
 	{
 		palloc_free_page (fn_copy);
-		printf("create fail : %s\n", token);
-		
 	}
-	printf("create complete : %s\n", token);
 	return tid;
 }
 
@@ -73,8 +70,6 @@ initd (void *f_name) {
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
-	printf("initd : %s\n", f_name);
-
 	process_init ();
 
 	if (process_exec (f_name) < 0)
@@ -346,8 +341,6 @@ load (const char *file_name, struct intr_frame *if_) {
       goto done;
    process_activate (thread_current ());   
 
-   printf("load : %s\n", file_name);
-
    char* token, * save_ptr;
    char* parse[64] = { NULL, };
    token = strtok_r(file_name, " ", &save_ptr);
@@ -360,15 +353,11 @@ load (const char *file_name, struct intr_frame *if_) {
       a++;
 	}
 
-	printf("%d\n", a);
-
 	for (i = 0; i < a - 1; i++)
 	{
 		printf("load iter parse : %s\n", parse[i]);
 	}
    
-   printf("load first token : %s\n", parse[0]);
-
    /* Open executable file. */
    file = filesys_open (parse[0]); // -> token
    if (file == NULL) {
