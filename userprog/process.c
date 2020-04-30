@@ -73,6 +73,7 @@ process_create_initd (const char *file_name) {
 /* A thread function that launches first user process. */
 static void
 initd (void *f_name) {
+	PANIC("reach here");
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
@@ -493,8 +494,6 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	*rsp = *rsp - 8;
 	**(void***)rsp = 0;
-
-	hex_dump(if_->rsp,if_->rsp,LOADER_PHYS_BASE - if_->rsp, true);
 
 	palloc_free_page(file_copy);
 done:
