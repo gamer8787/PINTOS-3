@@ -58,7 +58,11 @@ process_create_initd (const char *file_name) {
 	printf("thread created : %s\n", token);
 	tid = thread_create (token, PRI_DEFAULT, initd, fn_copy);
 	if (tid == TID_ERROR)
+	{
 		palloc_free_page (fn_copy);
+		printf("create fail : %s\n", token);
+	}
+	printf("create complete : %s\n", token);
 	return tid;
 }
 
