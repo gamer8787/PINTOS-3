@@ -346,18 +346,31 @@ load (const char *file_name, struct intr_frame *if_) {
       goto done;
    process_activate (thread_current ());   
 
-   char* token, * save_ptr;
-
    printf("load : %s\n", file_name);
 
+   char* token, * save_ptr;
+   char* parse[64] = { NULL, };
    token = strtok_r(file_name, " ", &save_ptr);
+   parse[0] = token;
+   int a = 1;
 
-   printf("load first token : %s\n", token);
+   while (token != NULL) {
+      token = strtok_r(NULL, " ", &save_ptr);
+      parse[a] = token;
+      a++;
+	}
+
+	for (i = 0; i < a - 1; i++)
+	{
+		printf("load iter parse : %s\n", parse[i]);
+	}
+   
+   printf("load first token : %s\n", parse[0]);
 
    /* Open executable file. */
-   file = filesys_open (token); // -> token
+   file = filesys_open (parse[0]); // -> token
    if (file == NULL) {
-      printf ("load: %s: open failed\n", token); //file_name -> token
+      printf ("load: %s: open failed\n", parse[0]); //file_name -> token
       goto done;
    }
 
@@ -435,22 +448,7 @@ load (const char *file_name, struct intr_frame *if_) {
 
    /* TODO: Your code goes here.
     * TODO: Implement argument passing (see project2/argument_passing.html). */
-   char* parse[64] = { NULL, };
-   parse[0] = token;
-   int a = 1;
-
-   while (token != NULL) {
-      token = strtok_r(NULL, " ", &save_ptr);
-      parse[a] = token;
-      a++;
-	}
-
-	for (i = 0; i < a - 1; i++)
-	{
-		printf("load : %s\n", parse[i]);
-	}
-
-	int lensum = 0;
+   int lensum = 0;
 	void** rsp = &if_->rsp;
 	for (int i = a - 2; i > -1; i--) {
     	for (int j = strlen(parse[i]); j > -1; j--) {
