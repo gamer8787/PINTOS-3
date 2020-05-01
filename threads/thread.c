@@ -217,6 +217,13 @@ thread_create(const char* name, int priority,
    init_thread(t, name, priority);
    //t->recent_cpu = thread_current()->recent_cpu;
    //t->nice = thread_current()->nice;
+   t->parent_thread = thread_current();
+   t->create = false;
+   t->terminate = false;
+   t->load.value = 0;
+   t->exit.value = 0;
+   list_push_back(&thread_current()->child_list, &t->child_elem);
+
    tid = t->tid = allocate_tid();
 
    /* Call the kernel_thread if it scheduled.
@@ -311,7 +318,9 @@ thread_exit(void) {
    ASSERT(!intr_context());
    list_remove(&thread_current()->all_elem);
 #ifdef USERPROG
+   thread_current()->terminate = true;
    process_exit();
+   sema_up(&thread_current()->exit);
 #endif
 
    /* Just set our status to dying and schedule another process.
@@ -486,7 +495,7 @@ init_thread(struct thread* t, const char* name, int priority) {
    t->init_priority = priority;
    t->wait_on_lock = NULL;
    list_init(&t->donations);
-   //t->donation_elem = ?
+   list_init(&t->child_list);
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
@@ -610,7 +619,7 @@ do_schedule(int status) {
    while (!list_empty (&destruction_req)) {
       struct thread *victim =
          list_entry (list_pop_front (&destruction_req), struct thread, elem);
-      palloc_free_page(victim);
+//      palloc_free_page(victim);
    }
    thread_current ()->status = status;
    schedule ();

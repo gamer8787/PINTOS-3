@@ -184,14 +184,17 @@ process_exec (void *f_name) {
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
-
 	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
+		thread_current()->create = false;
+		sema_up(&thread_current()->load);
 		return -1;
-
+	
+	thread_current()->create = true;
+	sema_up(&thread_current()->load);
 	/* Start switched process. */
 	do_iret (&_if);
 	NOT_REACHED ();
@@ -212,10 +215,18 @@ process_wait (tid_t child_tid UNUSED) {
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
-	while(1){
-
+	struct thread *user_thread = get_child_process(child_tid);
+	if (user_thread == NULL)
+	{
+		return -1;
 	}
-	return -1;
+	sema_down(&user_thread->exit);
+
+	int result = user_thread->terminate_status;
+
+	remove_child_process(user_thread);
+
+	return result;
 }
 
 /* Exit the process. This function is called by thread_exit (). */
@@ -226,6 +237,8 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
+
+	printf("%s: exit(%d)\n", curr->name, curr->terminate_status);
 
 	process_cleanup ();
 }
@@ -692,8 +705,27 @@ setup_stack (struct intr_frame *if_) {
 }
 #endif /* VM */
 
-void argument_stack(char **parse, int count, void **rsp)
-{
-	
+struct thread *get_child_process(int pid) {
+	struct thread *curr = thread_current();
+	struct list_elem *a = list_begin(&curr->child_list);
+	if (a != list_end(&curr->child_list))
+	{
+		struct list_elem *e;
+		e = a;
 
+		while (e != list_end(&curr->child_list))
+		{
+			struct thread *b = list_entry(e, struct thread, child_elem);
+			if (pid == b->tid)
+			{
+				return b;
+			}
+		}
+	}
+	return NULL;
+}
+
+void remove_child_process(struct thread *cp) {
+	list_remove(&cp->child_elem);
+	palloc_free_page(cp);
 }
