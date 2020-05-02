@@ -216,19 +216,15 @@ process_wait (tid_t child_tid UNUSED) {
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
-	printf("process wait start\n");
 	struct thread *user_thread = get_child_process(child_tid);
 	if (user_thread == NULL)
 	{
 		return -1;
 	}
-	printf("child process found\n");
 	if (!user_thread->terminate)
 	{
-		printf("wait start\n");
 		sema_down(&user_thread->exit);
 	}
-	printf("wait sema done\n");
 	
 	int result = user_thread->terminate_status;
 
