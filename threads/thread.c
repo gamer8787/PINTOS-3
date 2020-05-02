@@ -320,7 +320,9 @@ thread_exit(void) {
    list_remove(&thread_current()->all_elem);
 #ifdef USERPROG
    thread_current()->terminate = true;
+   printf("before sema up exit\n");
    sema_up(&thread_current()->exit);
+   printf("after sema up exit\n");
    process_exit();
 #endif
 

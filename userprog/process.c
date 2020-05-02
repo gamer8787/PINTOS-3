@@ -222,6 +222,7 @@ process_wait (tid_t child_tid UNUSED) {
 	{
 		return -1;
 	}
+	printf("child process found\n");
 	if (!user_thread->terminate)
 	{
 		printf("wait start\n");
