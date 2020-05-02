@@ -728,6 +728,7 @@ struct thread *get_child_process(int pid) {
 			{
 				return b;
 			}
+			e = list_next(e);
 		}
 	}
 	return NULL;
