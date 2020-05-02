@@ -656,7 +656,7 @@ schedule(void) {
 //      if (curr && curr->status == THREAD_DYING && curr != initial_thread) {
 //         ASSERT(curr != next);
 //         list_push_back(&destruction_req, &curr->elem);
-      }
+//      }
 
       /* Before switching the thread, we first save the information
        * of current running. */
