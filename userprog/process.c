@@ -220,8 +220,11 @@ process_wait (tid_t child_tid UNUSED) {
 	{
 		return -1;
 	}
-	sema_down(&user_thread->exit);
-
+	if (!user_thread->terminate)
+	{
+		sema_down(&user_thread->exit);
+	}
+	
 	int result = user_thread->terminate_status;
 
 	remove_child_process(user_thread);
@@ -716,7 +719,7 @@ struct thread *get_child_process(int pid) {
 		while (e != list_end(&curr->child_list))
 		{
 			struct thread *b = list_entry(e, struct thread, child_elem);
-			if (pid == b->tid)
+			if (pid == b->tid && b->create == true)
 			{
 				return b;
 			}

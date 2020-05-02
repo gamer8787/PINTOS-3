@@ -220,6 +220,7 @@ thread_create(const char* name, int priority,
    t->parent_thread = thread_current();
    t->create = false;
    t->terminate = false;
+   t->terminate_status = -1;
    t->load.value = 0;
    t->exit.value = 0;
    list_push_back(&thread_current()->child_list, &t->child_elem);
