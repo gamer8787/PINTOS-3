@@ -197,9 +197,9 @@ int filesize(int fd){
 }
 
 int read(int fd, void *buffer, unsigned size){
-	lock_acquire(&filesys_lock);
 	check_address(buffer);
 	check_address(buffer + size);
+	lock_acquire(&filesys_lock);
 	struct file *f = process_get_file(fd);
 	int read_byte = 0;
 	char c;
@@ -232,9 +232,9 @@ int read(int fd, void *buffer, unsigned size){
 }
 
 int write(int fd, const void *buffer, unsigned size){
-	lock_acquire(&filesys_lock);
 	check_address(buffer);
 	check_address(buffer + size);
+	lock_acquire(&filesys_lock);
 	struct file *f = process_get_file(fd);
 	int write_byte = 0;
 	if (f == NULL)
