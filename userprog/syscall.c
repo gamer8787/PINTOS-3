@@ -157,7 +157,7 @@ bool remove(const char *file){
 	bool result = false;
 	int len = strlen(file);
 	check_address(file);
-	check_addres(file + len);
+	check_address(file + len);
 
 	result = filesys_remove(file);
 
