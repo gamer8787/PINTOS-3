@@ -9,6 +9,8 @@
 #include "threads/flags.h"
 #include "intrinsic.h"
 #include "userprog/process.h"
+#include "filesys/file.h"
+#include "filesys/filesys.h"
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -38,6 +40,7 @@ syscall_init (void) {
 	 * mode stack. Therefore, we masked the FLAG_FL. */
 	write_msr(MSR_SYSCALL_MASK,
 			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
+	lock_init(&filesys_lock);
 }
 
 /* The main system call interface */
@@ -112,7 +115,9 @@ void exit(int status) {
 }
 
 pid_t fork(const char *thread_name) {
+	int len = strlen(thread_name);
 	check_address(thread_name);
+	check_address(thread_name + len);
 
 	return 1;
 }
@@ -165,29 +170,112 @@ bool remove(const char *file){
 }
 
 int open(const char *file){
-	return 0;
+	int len = strlen(file);
+	check_address(file);
+	check_address(file + len);
+	struct file *f = filesys_open(file);
+	if (f == NULL) {
+		return -1;
+	}
+	int fd = process_add_file(f);
+
+	return fd;
 }
 
 int filesize(int fd){
-	return 0;
+	struct file *f = process_get_file(fd);
+	off_t length;
+	if (f == NULL) 
+	{
+		return -1;
+	}
+	else {
+		length = file_length(f);
+		return length;
+	}
 }
 
 int read(int fd, void *buffer, unsigned size){
-	return 0;
+	lock_acquire(&filesys_lock);
+	check_address(buffer);
+	check_address(buffer + size);
+	struct file *f = process_get_file(fd);
+	int read_byte = 0;
+	char c;
+	if (f == NULL)
+	{
+		lock_release(&filesys_lock);
+		return -1;
+	}
+	if (fd == 0) {
+		for (int i = 0; i < size; i++) {
+			c = input_getc();
+			if (c == '\n' || i == size - 1){
+				*(char*)(buffer + i) = '\0';
+				read_byte++;
+				break;
+			}
+			else {
+				*(char*)(buffer + i) = c;
+				read_byte++;
+			}
+		}
+		lock_release(&filesys_lock);
+		return read_byte;
+	}
+	else {
+		read_byte = file_read(f, buffer, size);
+		lock_release(&filesys_lock);
+		return read_byte;
+	}
 }
 
 int write(int fd, const void *buffer, unsigned size){
-	return 0;
+	lock_acquire(&filesys_lock);
+	check_address(buffer);
+	check_address(buffer + size);
+	struct file *f = process_get_file(fd);
+	int write_byte = 0;
+	if (f == NULL)
+	{
+		lock_release(&filesys_lock);
+		return -1;
+	}
+	if (fd == 1) {
+		if (size > 1000) {
+			size = 1000;
+		}
+		putbuf(buffer, size);
+		write_byte = strlen((char *)buffer);
+		if (size < write_byte){
+			write_byte = size;
+		}
+		lock_release(&filesys_lock);
+		return write_byte;
+	}
+	else {
+		write_byte = file_write(f, buffer, size);
+		lock_release(&filesys_lock);
+		return write_byte;
+	}
 }
 
 void seek(int fd, unsigned position){
-
+	struct file *f = process_get_file(fd);
+	if (f == NULL) {
+		return;
+	}
+	file_seek(f, position);
 }
 
 unsigned tell(int fd){
-	return 0;
+	struct file *f = process_get_file(fd);
+	if (f == NULL){
+		return 0;
+	}
+	file_tell(f);
 }
 
 void close(int fd){
-	
+	process_close_file(fd);
 }

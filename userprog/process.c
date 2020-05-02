@@ -242,7 +242,15 @@ process_exit (void) {
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
 
+	for (int i = 3; i < curr->next_fd; i++) {
+		if (curr->fdt[i] != NULL) {
+			file_close(curr->fdt[i]);
+		}
+	}
+	curr->next_fd = 3;
+
 	printf("%s: exit(%d)\n", curr->name, curr->terminate_status);
+	
 
 	process_cleanup ();
 }
@@ -733,4 +741,29 @@ struct thread *get_child_process(int pid) {
 void remove_child_process(struct thread *cp) {
 	list_remove(&cp->child_elem);
 	palloc_free_page(cp);
+}
+
+int process_add_file(struct file *f) {
+	struct thread *curr = thread_curret();
+	int next = curr->next_fd;
+	curr->fdt[next] = f;
+	curr->next_fd = next + 1;
+	return next;
+}
+
+struct file *process_get_file(int fd) {
+	struct thread *curr = thread_current();
+	if (fd >= 0 && fd < curr->next_fd)
+	{
+		return curr->fdt[fd];
+	}
+	else {
+		return NULL;
+	}
+}
+
+void process_close_file(int fd) {
+	struct thread *curr = thread_current();
+	file_close(curr->fdt[fd]);
+	curr->fdt[fd] = NULL;
 }

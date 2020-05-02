@@ -114,6 +114,9 @@ struct thread {
 	struct semaphore load;
 	struct semaphore exit;
 
+	struct file *fdt[64];
+	int next_fd;
+
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint64_t *pml4;                     /* Page map level 4 */
