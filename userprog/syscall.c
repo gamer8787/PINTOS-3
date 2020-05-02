@@ -138,6 +138,7 @@ int exec(const char *cmd_line){
 }
 
 int wait(pid_t pid){
+	printf("syscall_wait\n");
 	int result = process_wait(pid);
 	return result;
 }
