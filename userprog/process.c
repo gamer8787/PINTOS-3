@@ -223,8 +223,10 @@ process_wait (tid_t child_tid UNUSED) {
 	}
 	if (!user_thread->terminate)
 	{
+		printf("wait start\n");
 		sema_down(&user_thread->exit);
 	}
+	printf("wait sema done\n");
 	
 	int result = user_thread->terminate_status;
 
