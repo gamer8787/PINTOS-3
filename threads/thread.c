@@ -221,8 +221,8 @@ thread_create(const char* name, int priority,
    t->create = false;
    t->terminate = false;
    t->terminate_status = -1;
-   t->load.value = 0;
-   t->exit.value = 0;
+   sema_init(&t->load,0);
+   sema_init(&t->exit,0);
    list_push_back(&thread_current()->child_list, &t->child_elem);
 
    tid = t->tid = allocate_tid();
