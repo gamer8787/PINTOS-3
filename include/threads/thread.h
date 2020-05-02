@@ -114,7 +114,7 @@ struct thread {
 	struct semaphore load;
 	struct semaphore exit;
 
-	struct file *fdt[64];
+	struct file *fdt[128];
 	int next_fd;
 
 #ifdef USERPROG

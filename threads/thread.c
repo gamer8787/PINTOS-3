@@ -225,9 +225,9 @@ thread_create(const char* name, int priority,
    sema_init(&t->exit,0);
    list_push_back(&thread_current()->child_list, &t->child_elem);
    t->next_fd = 3;
-   t->fdt[0] = stdin;
-   t->fdt[1] = stdout;
-   t->fdt[2] = stderr;
+   t->fdt[0] = NULL;
+   t->fdt[1] = NULL;
+   t->fdt[2] = NULL;
 
    tid = t->tid = allocate_tid();
 
