@@ -56,7 +56,7 @@ static struct thread* initial_thread;
 static struct lock tid_lock;
 
 /* Thread destruction requests */
-static struct list destruction_req;
+//static struct list destruction_req;
 
 /* Statistics. */
 static long long idle_ticks;    /* # of timer ticks spent idle. */
@@ -128,7 +128,7 @@ thread_init(void) {
    list_init(&ready_list);
    list_init(&sleep_list);
    list_init(&all_list);
-   list_init(&destruction_req);
+//   list_init(&destruction_req);
 
    /* Set up a thread structure for the running thread. */
    initial_thread = running_thread();
@@ -617,11 +617,11 @@ static void
 do_schedule(int status) {
    ASSERT (intr_get_level () == INTR_OFF);
    ASSERT (thread_current()->status == THREAD_RUNNING);
-   while (!list_empty (&destruction_req)) {
-      struct thread *victim =
-         list_entry (list_pop_front (&destruction_req), struct thread, elem);
+//   while (!list_empty (&destruction_req)) {
+//      struct thread *victim =
+//         list_entry (list_pop_front (&destruction_req), struct thread, elem);
 //      palloc_free_page(victim);
-   }
+//   }
    thread_current ()->status = status;
    schedule ();
 }
@@ -653,9 +653,9 @@ schedule(void) {
          currently used bye the stack.
          The real destruction logic will be called at the beginning of the
          schedule(). */
-      if (curr && curr->status == THREAD_DYING && curr != initial_thread) {
-         ASSERT(curr != next);
-         list_push_back(&destruction_req, &curr->elem);
+//      if (curr && curr->status == THREAD_DYING && curr != initial_thread) {
+//         ASSERT(curr != next);
+//         list_push_back(&destruction_req, &curr->elem);
       }
 
       /* Before switching the thread, we first save the information
