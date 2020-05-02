@@ -744,7 +744,7 @@ void remove_child_process(struct thread *cp) {
 }
 
 int process_add_file(struct file *f) {
-	struct thread *curr = thread_curret();
+	struct thread *curr = thread_current();
 	int next = curr->next_fd;
 	curr->fdt[next] = f;
 	curr->next_fd = next + 1;

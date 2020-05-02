@@ -11,6 +11,7 @@
 #include "userprog/process.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
+#include <string.h>
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -273,7 +274,7 @@ unsigned tell(int fd){
 	if (f == NULL){
 		return 0;
 	}
-	file_tell(f);
+	return file_tell(f);
 }
 
 void close(int fd){
