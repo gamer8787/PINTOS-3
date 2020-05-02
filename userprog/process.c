@@ -188,9 +188,11 @@ process_exec (void *f_name) {
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
+	{
 		thread_current()->create = false;
 		sema_up(&thread_current()->load);
 		return -1;
+	}
 	
 	thread_current()->create = true;
 	sema_up(&thread_current()->load);
