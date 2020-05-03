@@ -32,6 +32,7 @@ void check_address(void *addr);
 
 void
 syscall_init (void) {
+	printf("syscall init\n");
 	write_msr(MSR_STAR, ((uint64_t)SEL_UCSEG - 0x10) << 48  |
 			((uint64_t)SEL_KCSEG) << 32);
 	write_msr(MSR_LSTAR, (uint64_t) syscall_entry);
@@ -48,6 +49,7 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
+	printf("syscall handler\n");
 	uint64_t syscall_num = f->R.rax;
 	struct gp_registers reg = f->R;
 	switch(syscall_num) 
