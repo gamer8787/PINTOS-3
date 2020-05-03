@@ -160,7 +160,7 @@ bool create(const char *file, unsigned initial_size){
 	{
 		exit(-1);
 	}
-	else if (len > 14){
+	else if (len > READDIR_MAX_LEN){
 		printf("name so long\n");
 		return result;
 	}
