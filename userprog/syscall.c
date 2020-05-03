@@ -165,6 +165,7 @@ bool create(const char *file, unsigned initial_size){
 		return result;
 	}
 	else {
+		printf("create start\n");
 		result = filesys_create(file, initial_size);
 		return result;
 	}
