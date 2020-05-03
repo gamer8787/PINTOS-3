@@ -155,7 +155,7 @@ bool create(const char *file, unsigned initial_size){
 	check_address(file + len);
 	if (len == 0)
 	{
-		exit(-1);
+		return false;
 	}
 
 	result = filesys_create(file, initial_size);
