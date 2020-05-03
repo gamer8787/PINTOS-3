@@ -114,7 +114,7 @@ void exit(int status) {
 	thread_exit();
 }
 
-tid_t fork(const char *thread_name) {
+pid_t fork(const char *thread_name) {
 	int len = strlen(thread_name);
 	check_address(thread_name);
 	check_address(thread_name + len);
@@ -142,7 +142,7 @@ int exec(const char *cmd_line){
 	}
 }
 
-int wait(tid_t pid){
+int wait(pid_t pid){
 	int result = process_wait(pid);
 	return result;
 }
@@ -166,7 +166,7 @@ bool create(const char *file, unsigned initial_size){
 	}
 	else {
 		printf("create start\n");
-		result = filesys_create(file, initial_size);
+		//result = filesys_create(file, initial_size);
 		return result;
 	}
 }
