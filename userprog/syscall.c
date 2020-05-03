@@ -150,10 +150,14 @@ int wait(pid_t pid){
 
 bool create(const char *file, unsigned initial_size){
 	bool result = false;
+	if (file == NULL)
+	{
+		exit(-1);
+	}
 	int len = strlen(file);
 	check_address(file);
 	check_address(file + len);
-	if (len == 0 || file == NULL)
+	if (len == 0)
 	{
 		exit(-1);
 	}
