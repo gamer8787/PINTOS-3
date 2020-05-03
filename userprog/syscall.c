@@ -32,7 +32,6 @@ void check_address(void *addr);
 
 void
 syscall_init (void) {
-	printf("syscall init\n");
 	write_msr(MSR_STAR, ((uint64_t)SEL_UCSEG - 0x10) << 48  |
 			((uint64_t)SEL_KCSEG) << 32);
 	write_msr(MSR_LSTAR, (uint64_t) syscall_entry);
@@ -49,7 +48,6 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
-	printf("syscall handler\n");
 	uint64_t syscall_num = f->R.rax;
 	struct gp_registers reg = f->R;
 	switch(syscall_num) 
@@ -112,14 +110,12 @@ void halt(void) {
 }
 
 void exit(int status) {
-	printf("exit called\n");
 	struct thread *curr = thread_current();
 	curr->terminate_status = status;
 	thread_exit();
 }
 
 pid_t fork(const char *thread_name) {
-	printf("fort called\n");
 	int len = strlen(thread_name);
 	check_address(thread_name);
 	check_address(thread_name + len);
@@ -128,7 +124,6 @@ pid_t fork(const char *thread_name) {
 }
 
 int exec(const char *cmd_line){
-	printf("exec called\n");
 	int len = strlen(cmd_line);
 	check_address(cmd_line);
 	check_address(cmd_line + len);
@@ -149,9 +144,7 @@ int exec(const char *cmd_line){
 }
 
 int wait(pid_t pid){
-	printf("wait called\n");
 	int result = process_wait(pid);
-	printf("wait done\n");
 	return result;
 }
 
@@ -239,7 +232,6 @@ int read(int fd, void *buffer, unsigned size){
 }
 
 int write(int fd, const void *buffer, unsigned size){
-	printf("write called\n");
 	check_address(buffer);
 	check_address(buffer + size);
 	struct file *f = process_get_file(fd);
