@@ -42,7 +42,7 @@ syscall_init (void) {
 	 * mode stack. Therefore, we masked the FLAG_FL. */
 	write_msr(MSR_SYSCALL_MASK,
 			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
-	//lock_init(&filesys_lock);
+	lock_init(&filesys_lock);
 }
 
 /* The main system call interface */
@@ -206,7 +206,7 @@ int filesize(int fd){
 int read(int fd, void *buffer, unsigned size){
 	check_address(buffer);
 	check_address(buffer + size);
-	//lock_acquire(&filesys_lock);
+	lock_acquire(&filesys_lock);
 	struct file *f = process_get_file(fd);
 	int read_byte = 0;
 	char c;
@@ -223,17 +223,17 @@ int read(int fd, void *buffer, unsigned size){
 				read_byte++;
 			}
 		}
-		//lock_release(&filesys_lock);
+		lock_release(&filesys_lock);
 		return read_byte;
 	}
 	else {
 		if (f == NULL)
 		{
-		//lock_release(&filesys_lock);
+		lock_release(&filesys_lock);
 		return -1;
 		}
 		read_byte = file_read(f, buffer, size);
-		//lock_release(&filesys_lock);
+		lock_release(&filesys_lock);
 		return read_byte;
 	}
 }
@@ -260,9 +260,9 @@ int write(int fd, const void *buffer, unsigned size){
 		{
 		return -1;
 		}
-		//lock_acquire(&filesys_lock);
+		lock_acquire(&filesys_lock);
 		write_byte = file_write(f, buffer, size);
-		//lock_release(&filesys_lock);
+		lock_release(&filesys_lock);
 		return write_byte;
 	}
 }

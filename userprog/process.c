@@ -728,7 +728,7 @@ struct thread *get_child_process(int pid) {
 		while (e != list_end(&curr->child_list))
 		{
 			struct thread *b = list_entry(e, struct thread, child_elem);
-			if (pid == b->tid && b->create == true)
+			if (pid == b->tid)
 			{
 				return b;
 			}
