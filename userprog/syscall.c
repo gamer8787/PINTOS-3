@@ -1,5 +1,6 @@
 #include "userprog/syscall.h"
 #include <stdio.h>
+#include "user/syscall.h"
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
@@ -58,37 +59,37 @@ syscall_handler (struct intr_frame *f UNUSED) {
 			exit(reg.rdi);
 			break;
 		case SYS_FORK:
-			fork(reg.rdi);
+			f->R.rax = fork(reg.rdi);
 			break;
 		case SYS_EXEC:
-			exec(reg.rdi);
+			f->R.rax = exec(reg.rdi);
 			break;
 		case SYS_WAIT:
-			wait(reg.rdi);
+			f->R.rax = wait(reg.rdi);
 			break;
 		case SYS_CREATE:
-			create(reg.rdi, reg.rsi);
+			f->R.rax = create(reg.rdi, reg.rsi);
 			break;
 		case SYS_REMOVE:
-			remove(reg.rdi);
+			f->R.rax = remove(reg.rdi);
 			break;
 		case SYS_OPEN:
-			open(reg.rdi);
+			f->R.rax = open(reg.rdi);
 			break;
 		case SYS_FILESIZE:
-			filesize(reg.rdi);
+			f->R.rax = filesize(reg.rdi);
 			break;
 		case SYS_READ:
-			read(reg.rdi, reg.rsi, reg.rdx);
+			f->R.rax = read(reg.rdi, reg.rsi, reg.rdx);
 			break;
 		case SYS_WRITE:
-			write(reg.rdi, reg.rsi, reg.rdx);
+			f->R.rax = write(reg.rdi, reg.rsi, reg.rdx);
 			break;
 		case SYS_SEEK:
 			seek(reg.rdi, reg.rsi);
 			break;
 		case SYS_TELL:
-			tell(reg.rdi);
+			f->R.rax = tell(reg.rdi);
 			break;
 		case SYS_CLOSE:
 			close(reg.rdi);
@@ -156,19 +157,8 @@ bool create(const char *file, unsigned initial_size){
 	check_address(file);
 	int len = strlen(file);
 	check_address(file + len);
-	if (len == 0)
-	{
-		exit(-1);
-	}
-	else if (len > READDIR_MAX_LEN){
-		printf("name so long\n");
-		return result;
-	}
-	else {
-		printf("create start\n");
-		result = filesys_create(file, initial_size);
-		return result;
-	}
+	result = filesys_create(file, initial_size);
+	return result;
 }
 
 bool remove(const char *file){
