@@ -116,16 +116,16 @@ void exit(int status) {
 }
 
 pid_t fork(const char *thread_name) {
-	int len = strlen(thread_name);
 	check_address(thread_name);
+	int len = strlen(thread_name);
 	check_address(thread_name + len);
 
 	return 1;
 }
 
 int exec(const char *cmd_line){
-	int len = strlen(cmd_line);
 	check_address(cmd_line);
+	int len = strlen(cmd_line);
 	check_address(cmd_line + len);
 
 	int user_pid = process_create_initd(cmd_line);
@@ -163,8 +163,12 @@ bool create(const char *file, unsigned initial_size){
 
 bool remove(const char *file){
 	bool result = false;
-	int len = strlen(file);
+	if (file == NULL)
+	{
+		exit(-1);
+	}
 	check_address(file);
+	int len = strlen(file);
 	check_address(file + len);
 
 	result = filesys_remove(file);
@@ -173,8 +177,12 @@ bool remove(const char *file){
 }
 
 int open(const char *file){
-	int len = strlen(file);
+	if (file == NULL)
+	{
+		exit(-1);
+	}
 	check_address(file);
+	int len = strlen(file);
 	check_address(file + len);
 	struct file *f = filesys_open(file);
 	if (f == NULL) {
