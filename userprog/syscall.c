@@ -110,12 +110,14 @@ void halt(void) {
 }
 
 void exit(int status) {
+	printf("exit called\n");
 	struct thread *curr = thread_current();
 	curr->terminate_status = status;
 	thread_exit();
 }
 
 pid_t fork(const char *thread_name) {
+	printf("fort called\n");
 	int len = strlen(thread_name);
 	check_address(thread_name);
 	check_address(thread_name + len);
@@ -144,7 +146,9 @@ int exec(const char *cmd_line){
 }
 
 int wait(pid_t pid){
+	printf("wait called\n");
 	int result = process_wait(pid);
+	printf("wait done\n");
 	return result;
 }
 
@@ -232,6 +236,7 @@ int read(int fd, void *buffer, unsigned size){
 }
 
 int write(int fd, const void *buffer, unsigned size){
+	printf("write called\n");
 	check_address(buffer);
 	check_address(buffer + size);
 	struct file *f = process_get_file(fd);
