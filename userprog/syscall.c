@@ -154,8 +154,8 @@ bool create(const char *file, unsigned initial_size){
 	{
 		exit(-1);
 	}
-	int len = strlen(file);
 	check_address(file);
+	int len = strlen(file);
 	check_address(file + len);
 	if (len == 0)
 	{
