@@ -162,7 +162,7 @@ bool create(const char *file, unsigned initial_size){
 		exit(-1);
 	}
 	else if (len > 14){
-		return false;
+		return result;
 	}
 	else {
 		result = filesys_create(file, initial_size);
