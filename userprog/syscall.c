@@ -162,6 +162,7 @@ bool create(const char *file, unsigned initial_size){
 		exit(-1);
 	}
 	else if (len > 14){
+		printf("name so long\n");
 		return result;
 	}
 	else {
