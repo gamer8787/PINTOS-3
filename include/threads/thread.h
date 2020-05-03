@@ -110,9 +110,11 @@ struct thread {
 
 	bool create;
 	bool terminate;
+	bool copied;
 	int terminate_status;
 	struct semaphore load;
 	struct semaphore exit;
+	struct semaphore fork;
 
 	struct file *fdt[128];
 	int next_fd;

@@ -121,7 +121,20 @@ pid_t fork(const char *thread_name) {
 	int len = strlen(thread_name);
 	check_address(thread_name + len);
 
-	return 1;
+	int child_pid = process_fork(thread_name, &thread_current()->tf);
+	if (child_pid == TID_ERROR) {
+		return TID_ERROR;
+	}
+
+	struct thread *child_thread = get_child_process(child_pid);
+	sema_down(&child_thread->fork);
+
+	if (child_thread->copied){
+		return child_pid;
+	}
+	else {
+		return TID_ERROR;
+	}
 }
 
 int exec(const char *cmd_line){

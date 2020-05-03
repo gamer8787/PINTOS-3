@@ -220,9 +220,11 @@ thread_create(const char* name, int priority,
    t->parent_thread = thread_current();
    t->create = false;
    t->terminate = false;
+   t->copied = false;
    t->terminate_status = -1;
    sema_init(&t->load,0);
    sema_init(&t->exit,0);
+   sema_init(&t->fork,0);
    list_push_back(&thread_current()->child_list, &t->child_elem);
    t->next_fd = 3;
    t->fdt[0] = NULL;
