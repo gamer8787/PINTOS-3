@@ -247,10 +247,6 @@ process_exit (void) {
 		}
 	}
 	curr->next_fd = 3;
-	if (is_user_vaddr(curr))
-	{
-		printf("%s: exit(%d)\n", curr->name, curr->terminate_status);
-	}
 	process_cleanup ();
 }
 
