@@ -164,10 +164,10 @@ bool create(const char *file, unsigned initial_size){
 	else if (len > 14){
 		return false;
 	}
-
-	result = filesys_create(file, initial_size);
-
-	return result;
+	else {
+		result = filesys_create(file, initial_size);
+		return result;
+	}
 }
 
 bool remove(const char *file){
