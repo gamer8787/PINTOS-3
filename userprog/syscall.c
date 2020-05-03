@@ -1,7 +1,6 @@
 #include "userprog/syscall.h"
 #include <stdio.h>
 #include <syscall-nr.h>
-#include "user/syscall.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/loader.h"
@@ -115,7 +114,7 @@ void exit(int status) {
 	thread_exit();
 }
 
-pid_t fork(const char *thread_name) {
+tid_t fork(const char *thread_name) {
 	int len = strlen(thread_name);
 	check_address(thread_name);
 	check_address(thread_name + len);
@@ -143,7 +142,7 @@ int exec(const char *cmd_line){
 	}
 }
 
-int wait(pid_t pid){
+int wait(tid_t pid){
 	int result = process_wait(pid);
 	return result;
 }
