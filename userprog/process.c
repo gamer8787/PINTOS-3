@@ -99,7 +99,7 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 	bool writable;
 
 	/* 1. TODO: If the parent_page is kernel page, then return immediately. */
-	if (is_kern_pte(pte))
+	if (is_kernel_vaddr(pte))
 	{
 		return false;
 	}
