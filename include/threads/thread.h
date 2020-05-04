@@ -116,6 +116,8 @@ struct thread {
 	struct semaphore exit;
 	struct semaphore fork;
 
+	struct intr_frame *fork_if;
+
 	struct file *fdt[128];
 	int next_fd;
 
