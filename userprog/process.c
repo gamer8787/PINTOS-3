@@ -83,7 +83,6 @@ tid_t
 process_fork (const char *name, struct intr_frame *if_ UNUSED) {
 	/* Clone current thread to new thread.*/
 	thread_current()->fork_if = if_;
-	printf("parent fork\n");
 	return thread_create (name,
 			PRI_DEFAULT, __do_fork, thread_current ());
 }
@@ -128,7 +127,6 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 		palloc_free_page(newpage);
 		return false;
 	}
-	printf("duplicate pte done\n");
 	return true;
 }
 #endif
@@ -180,7 +178,6 @@ __do_fork (void *aux) {
 
 	if_.R.rax = 0;
 	current->copied = true;
-	printf("do fork done\n");
 	sema_up(&current->fork);
 
 	process_init ();

@@ -126,11 +126,12 @@ pid_t fork(const char *thread_name) {
 		return TID_ERROR;
 	}
 
-	printf("%d\n", thread_current()->status);
-
 	struct thread *child_thread = get_child_process(child_pid);
-	sema_down(&child_thread->fork);
-
+	if (!child_thread->copied)
+	{
+		sema_down(&child_thread->fork);
+	}
+	
 	if (child_thread->copied){
 		return child_pid;
 	}
@@ -149,8 +150,11 @@ int exec(const char *cmd_line){
 		return user_pid;
 	}
 	struct thread *user_thread = get_child_process(user_pid);
-	sema_down(&user_thread->load);
-
+	if (!user_thread->create)
+	{
+		sema_down(&user_thread->load);
+	}
+	
 	if (user_thread->create){
 		return user_pid;
 	}
