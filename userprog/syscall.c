@@ -126,6 +126,8 @@ pid_t fork(const char *thread_name) {
 		return TID_ERROR;
 	}
 
+	printf("%d\n", thread_current()->status);
+
 	struct thread *child_thread = get_child_process(child_pid);
 	sema_down(&child_thread->fork);
 
