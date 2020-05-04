@@ -150,7 +150,9 @@ __do_fork (void *aux) {
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
 	if (current->pml4 == NULL)
+	{
 		goto error;
+	}
 
 	process_activate (current);
 #ifdef VM
@@ -184,6 +186,7 @@ __do_fork (void *aux) {
 	if (succ)
 		do_iret (&if_);
 error:
+	sema_up(&current->fork);
 	thread_exit ();
 }
 
