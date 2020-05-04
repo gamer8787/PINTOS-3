@@ -104,6 +104,8 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 		return false;
 	}
 
+	printf("asdf\n");
+
 	/* 2. Resolve VA from the parent's page map level 4. */
 	parent_page = pml4_get_page (parent->pml4, va);
 
