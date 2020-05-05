@@ -147,16 +147,13 @@ int exec(const char *cmd_line){
 
 	int user_pid = process_create_initd(cmd_line);
 	if (user_pid == TID_ERROR) {
-		return user_pid;
+		exit(-1);
 	}
 	struct thread *user_thread = get_child_process(user_pid);
 	sema_down(&user_thread->load);
 	
-	if (user_thread->create){
-		return user_pid;
-	}
-	else {
-		return -1;
+	if (!user_thread->create){
+		exit(-1);
 	}
 }
 
