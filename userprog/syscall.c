@@ -62,7 +62,7 @@ syscall_handler (struct intr_frame *f UNUSED) {
 			f->R.rax = fork(reg.rdi);
 			break;
 		case SYS_EXEC:
-			f->R.rax = exec(reg.rdi);
+			exec(reg.rdi);
 			break;
 		case SYS_WAIT:
 			f->R.rax = wait(reg.rdi);
