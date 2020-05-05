@@ -208,8 +208,12 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	printf("before load\n");
+
 	/* And then load the binary */
 	success = load (file_name, &_if);
+
+	printf("after load\n");
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
