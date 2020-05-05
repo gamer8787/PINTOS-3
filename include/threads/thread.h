@@ -108,17 +108,15 @@ struct thread {
 	struct list child_list;
 	struct list_elem child_elem;
 
-	bool create;
 	bool terminate;
 	bool copied;
 	int terminate_status;
-	struct semaphore load;
 	struct semaphore exit;
 	struct semaphore fork;
 
 	struct intr_frame *fork_if;
 
-	struct file *fdt[32];
+	struct file *fdt[128];
 	int next_fd;
 
 #ifdef USERPROG

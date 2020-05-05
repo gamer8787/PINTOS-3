@@ -218,11 +218,9 @@ thread_create(const char* name, int priority,
    //t->recent_cpu = thread_current()->recent_cpu;
    //t->nice = thread_current()->nice;
    t->parent_thread = thread_current();
-   t->create = false;
    t->terminate = false;
    t->copied = false;
    t->terminate_status = -1;
-   sema_init(&t->load,0);
    sema_init(&t->exit,0);
    sema_init(&t->fork,0);
    t->fork_if = NULL;
