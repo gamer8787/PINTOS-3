@@ -221,7 +221,9 @@ process_exec (void *f_name) {
 	}
 	
 	thread_current()->create = true;
+	printf("before sema_up\n");
 	sema_up(&thread_current()->load);
+	printf("after sema_up\n");
 	/* Start switched process. */
 	do_iret (&_if);
 	NOT_REACHED ();
