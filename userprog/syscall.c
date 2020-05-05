@@ -145,11 +145,7 @@ int exec(const char *cmd_line){
 	int len = strlen(cmd_line);
 	check_address(cmd_line + len);
 
-	printf("before process_exec\n");
-
 	int success = process_exec(cmd_line);
-	
-	printf("after process_exec\n");
 
 	if (success < 0) {
 		exit(-1);
