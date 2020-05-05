@@ -141,6 +141,7 @@ pid_t fork(const char *thread_name) {
 }
 
 int exec(const char *cmd_line){
+	printf("exec called with %s\n", cmd_line);
 	check_address(cmd_line);
 	int len = strlen(cmd_line);
 	check_address(cmd_line + len);
