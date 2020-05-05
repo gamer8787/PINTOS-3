@@ -152,7 +152,9 @@ int exec(const char *cmd_line){
 	struct thread *user_thread = get_child_process(user_pid);
 	if (!user_thread->create)
 	{
+		printf("before sema_down\n");
 		sema_down(&user_thread->load);
+		printf("after sema_down\n");
 	}
 	
 	if (!user_thread->create){
