@@ -150,10 +150,7 @@ int exec(const char *cmd_line){
 		return user_pid;
 	}
 	struct thread *user_thread = get_child_process(user_pid);
-	if (!user_thread->create)
-	{
-		sema_down(&user_thread->load);
-	}
+	sema_down(&user_thread->load);
 	
 	if (user_thread->create){
 		return user_pid;
