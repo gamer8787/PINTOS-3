@@ -205,12 +205,8 @@ process_exec (void *f_name) {
 	_if.cs = SEL_UCSEG;
 	_if.eflags = FLAG_IF | FLAG_MBS;
 
-	printf("before cleanup\n");
-
 	/* We first kill the current context */
 	process_cleanup ();
-
-	printf("after cleanup before load\n");
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
