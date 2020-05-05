@@ -205,15 +205,17 @@ process_exec (void *f_name) {
 	_if.cs = SEL_UCSEG;
 	_if.eflags = FLAG_IF | FLAG_MBS;
 
+	file_name = palloc_get_page (0);
+   	if (file_name == NULL)
+    	return TID_ERROR;
+   	strlcpy (file_name, f_name, PGSIZE);
+
+
 	/* We first kill the current context */
 	process_cleanup ();
 
-	printf("before load\n");
-
 	/* And then load the binary */
 	success = load (file_name, &_if);
-
-	printf("after load\n");
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
