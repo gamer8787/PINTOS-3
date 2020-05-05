@@ -747,7 +747,7 @@ void test_max_priority(void) {
       struct thread* max_prior = list_entry(list_begin(&ready_list), struct thread, elem);   /* priority max tread in ready list */
       enum intr_level old_level ;
       ASSERT (!intr_context());
-      if (curr->priority < max_prior->priority)                                    /* compare priority between current, max */
+      if (curr->priority <= max_prior->priority)                                    /* compare priority between current, max */
       {
          old_level = intr_disable();
          list_insert_ordered(&ready_list, &curr->elem, cmp_priority, NULL);
