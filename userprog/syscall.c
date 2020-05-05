@@ -148,6 +148,7 @@ int exec(const char *cmd_line){
 	int success = process_exec(cmd_line);
 
 	if (success < 0) {
+		printf("process_exec failed\n");
 		exit(-1);
 	}
 }
