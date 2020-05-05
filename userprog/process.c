@@ -215,15 +215,9 @@ process_exec (void *f_name) {
 	palloc_free_page (file_name);
 	if (!success)
 	{
-		thread_current()->create = false;
-		sema_up(&thread_current()->load);
 		return -1;
 	}
 	
-	thread_current()->create = true;
-	printf("before sema_up\n");
-	sema_up(&thread_current()->load);
-	printf("after sema_up\n");
 	/* Start switched process. */
 	do_iret (&_if);
 	NOT_REACHED ();

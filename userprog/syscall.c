@@ -141,24 +141,13 @@ pid_t fork(const char *thread_name) {
 }
 
 int exec(const char *cmd_line){
-	printf("exec called with %s\n", cmd_line);
 	check_address(cmd_line);
 	int len = strlen(cmd_line);
 	check_address(cmd_line + len);
 
-	int user_pid = process_create_initd(cmd_line);
-	if (user_pid == TID_ERROR) {
-		exit(-1);
-	}
-	struct thread *user_thread = get_child_process(user_pid);
-	if (!user_thread->create)
-	{
-		printf("before sema_down\n");
-		sema_down(&user_thread->load);
-		printf("after sema_down\n");
-	}
-	
-	if (!user_thread->create){
+	int success = process_exec(cmd_line);
+
+	if (success < 0) {
 		exit(-1);
 	}
 }
