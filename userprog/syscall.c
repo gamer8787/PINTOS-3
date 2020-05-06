@@ -153,7 +153,8 @@ int exec(const char *cmd_line){
 }
 
 int wait(pid_t pid){
-	return process_wait(pid);
+	int result = process_wait(pid);
+	return result;
 }
 
 bool create(const char *file, unsigned initial_size){
