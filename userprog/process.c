@@ -175,8 +175,6 @@ __do_fork (void *aux) {
 		f = file_duplicate(parent->fdt[i]);
 		process_add_file(f);
 	}
-
-	if_.R.rax = 0;
 	current->copied = true;
 	sema_up(&current->fork);
 

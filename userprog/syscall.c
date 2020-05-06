@@ -133,7 +133,13 @@ pid_t fork(const char *thread_name) {
 	}
 	
 	if (child_thread->copied){
-		return child_pid;
+		if (thread_current()->tid == child_pid)
+		{
+			return 0;
+		}
+		else {
+			return child_pid;
+		}
 	}
 	else {
 		return TID_ERROR;
