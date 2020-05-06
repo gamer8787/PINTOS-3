@@ -120,10 +120,11 @@ sema_up (struct semaphore *sema) {
 		sema->value++;
 		if (!intr_context())
 		{
-			if (cur->priority <= next->priority)
-			{
-				thread_yield();
-			}
+			//if (cur->priority <= next->priority)
+			//{
+			//	thread_yield();
+			//}
+			test_max_priority();
 		}
 	}
 	else {

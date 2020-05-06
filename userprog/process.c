@@ -183,7 +183,6 @@ __do_fork (void *aux) {
 	/* Finally, switch to the newly created process. */
 	if (succ)
 	{
-		if_.R.rax = 0;
 		do_iret (&if_);
 	}
 error:
