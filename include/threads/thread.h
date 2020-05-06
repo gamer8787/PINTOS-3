@@ -97,6 +97,8 @@ struct thread {
 	int recent_cpu;
 	struct list_elem all_elem;
 
+	struct file *run_file;
+
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
 	int init_priority;					/* Initial priority */

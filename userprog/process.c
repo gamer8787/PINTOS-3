@@ -17,7 +17,9 @@
 #include "threads/thread.h"
 #include "threads/mmu.h"
 #include "threads/vaddr.h"
+#include "threads/synch.h"
 #include "intrinsic.h"
+#include "userprog/syscall.h"
 #ifdef VM
 #include "vm/vm.h"
 #endif
@@ -407,13 +409,18 @@ load (const char *file_name, struct intr_frame *if_) {
     	goto done;
    	process_activate (thread_current ());   
 
+	lock_acquire(filesys_lock);
    	/* Open executable file. */
    	file = filesys_open(file_name); // -> token
 
    	if (file == NULL) {
+		lock_release(filesys_lock);
       	printf ("load: %s: open failed\n", file_name); //file_name -> token
       	goto done;
    	}
+	t->run_file = file;
+	file_deny_write(file);
+	lock_release(filesys_lock);
 
    	/* Read and verify executable header. */
    	if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr

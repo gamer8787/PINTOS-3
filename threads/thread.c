@@ -229,6 +229,7 @@ thread_create(const char* name, int priority,
    t->fdt[0] = NULL;
    t->fdt[1] = NULL;
    t->fdt[2] = NULL;
+   t->run_file = NULL;
 
    tid = t->tid = allocate_tid();
 
