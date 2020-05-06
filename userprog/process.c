@@ -277,7 +277,6 @@ process_exit (void) {
 	for (int i = 3; i < curr->next_fd; i++) {
 		f = curr->fdt[i];
 		if (f != NULL) {
-			inode_allow_write(f->inode);
 			file_close(f);
 		}
 	}
