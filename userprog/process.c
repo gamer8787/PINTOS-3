@@ -182,7 +182,10 @@ __do_fork (void *aux) {
 
 	/* Finally, switch to the newly created process. */
 	if (succ)
+	{
+		if_->R.rax = 0;
 		do_iret (&if_);
+	}
 error:
 	sema_up(&current->fork);
 	thread_exit ();
@@ -239,7 +242,6 @@ process_exec (void *f_name) {
  * does nothing. */
 int
 process_wait (tid_t child_tid UNUSED) {
-	printf("process wait on %d\n", child_tid);
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
