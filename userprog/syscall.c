@@ -159,7 +159,6 @@ int exec(const char *cmd_line){
 }
 
 int wait(pid_t pid){
-	printf("wait on %d\n", pid);
 	int result = process_wait(pid);
 	return result;
 }
