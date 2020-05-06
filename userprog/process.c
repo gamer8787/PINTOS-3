@@ -10,6 +10,7 @@
 #include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
+#include "filesys/inode.h"
 #include "threads/flags.h"
 #include "threads/init.h"
 #include "threads/interrupt.h"
@@ -268,13 +269,16 @@ process_wait (tid_t child_tid UNUSED) {
 void
 process_exit (void) {
 	struct thread *curr = thread_current ();
+	struct file *f = NULL;
 	/* TODO: Your code goes here.
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
 	for (int i = 3; i < curr->next_fd; i++) {
-		if (curr->fdt[i] != NULL) {
-			file_close(curr->fdt[i]);
+		f = curr->fdt[i];
+		if (f != NULL) {
+			inode_allow_write(f->inode);
+			file_close(f);
 		}
 	}
 	curr->next_fd = 3;
@@ -420,6 +424,7 @@ load (const char *file_name, struct intr_frame *if_) {
    	}
 	t->run_file = file;
 	file_deny_write(file);
+	inode_deny_write(file->inode);
 	lock_release(&filesys_lock);
 
    	/* Read and verify executable header. */
