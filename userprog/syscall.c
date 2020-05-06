@@ -48,6 +48,7 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
+	int result;
 	uint64_t syscall_num = f->R.rax;
 	struct gp_registers reg = f->R;
 	switch(syscall_num) 
@@ -59,7 +60,14 @@ syscall_handler (struct intr_frame *f UNUSED) {
 			exit(reg.rdi);
 			break;
 		case SYS_FORK:
-			f->R.rax = fork(reg.rdi);
+			result = fork(reg.rdi);
+			if (thread_current()->tid == result)
+			{
+			f->R.rax = result;
+			}
+			else {
+				f->R.rax = 0;
+			}
 			break;
 		case SYS_EXEC:
 			exec(reg.rdi);
@@ -132,14 +140,9 @@ pid_t fork(const char *thread_name) {
 		sema_down(&child_thread->fork);
 	}
 	
-	if (child_thread->copied){
-		if (thread_current()->tid == child_pid)
-		{
-			return 0;
-		}
-		else {
-			return child_pid;
-		}
+	if (child_thread->copied)
+	{
+		return child_pid;
 	}
 	else {
 		return TID_ERROR;
