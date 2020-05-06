@@ -423,7 +423,7 @@ load (const char *file_name, struct intr_frame *if_) {
    	}
 	t->run_file = file;
 	file_deny_write(file);
-	inode_deny_write(file->inode);
+	//inode_deny_write(file->inode);
 	lock_release(&filesys_lock);
 
    	/* Read and verify executable header. */
