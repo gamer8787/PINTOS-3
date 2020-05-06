@@ -60,15 +60,9 @@ syscall_handler (struct intr_frame *f UNUSED) {
 			exit(reg.rdi);
 			break;
 		case SYS_FORK:
-			result = fork(reg.rdi);
-			if (thread_current()->tid == result)
-			{
-			f->R.rax = result;
-			}
-			else {
-				f->R.rax = 0;
-			}
-			break;
+        	thread_current()->fork_if=f;
+        	f->R.rax = fork(reg.rdi);
+        	break;
 		case SYS_EXEC:
 			exec(reg.rdi);
 			break;
