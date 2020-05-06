@@ -249,7 +249,7 @@ process_wait (tid_t child_tid UNUSED) {
 	}
 	if (!user_thread->terminate)
 	{
-		printf("%d\n", 012);
+		printf("%d\n", 12);
 		sema_down(&user_thread->exit);
 	}
 	
