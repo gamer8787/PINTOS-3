@@ -280,7 +280,7 @@ process_exit (void) {
 			file_close(f);
 		}
 	}
-	file_close(curr->run_file);
+	inode_allow_write(file_get_inode(curr->run_file));
 	curr->next_fd = 3;
 	process_cleanup ();
 }
@@ -423,7 +423,7 @@ load (const char *file_name, struct intr_frame *if_) {
       	goto done;
    	}
 	t->run_file = file;
-	file_deny_write(file);
+	inode_deny_write(file_get_inode(file));
 	lock_release(&filesys_lock);
 
    	/* Read and verify executable header. */
