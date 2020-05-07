@@ -118,7 +118,7 @@ struct thread {
 
 	struct intr_frame *fork_if;
 
-	struct file *fdt[64];
+	struct file *fdt[128];
 	int next_fd;
 
 #ifdef USERPROG
