@@ -257,6 +257,7 @@ int read(int fd, void *buffer, unsigned size){
 int write(int fd, const void *buffer, unsigned size){
 	check_address(buffer);
 	check_address(buffer + size);
+	lock_acquire(&filesys_lock);
 	struct file *f = process_get_file(fd);
 	int write_byte = 0;
 	if (fd == 1) {
@@ -268,14 +269,15 @@ int write(int fd, const void *buffer, unsigned size){
 		if (size < write_byte){
 			write_byte = size;
 		}
+		lock_release(&filesys_lock);
 		return write_byte;
 	}
 	else {
 		if (f == NULL)
 		{
-		return -1;
+			lock_release(&filesys_lock);
+			return -1;
 		}
-		lock_acquire(&filesys_lock);
 		write_byte = file_write(f, buffer, size);
 		lock_release(&filesys_lock);
 		return write_byte;
