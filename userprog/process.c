@@ -218,8 +218,12 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	printf("process_exec before load\n");
+
 	/* And then load the binary */
 	success = load (file_name, &_if);
+
+	printf("process_exec after load\n");
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
@@ -411,7 +415,9 @@ load (const char *file_name, struct intr_frame *if_) {
 	t->pml4 = pml4_create ();
 	if (t->pml4 == NULL)
     	goto done;
-   	process_activate (thread_current ());   
+   	process_activate (thread_current ());
+
+	printf("load before filesys open\n");   
 
    	/* Open executable file. */
    	file = filesys_open(file_name); // -> token
