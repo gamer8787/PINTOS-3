@@ -280,6 +280,7 @@ process_exit (void) {
 			file_close(f);
 		}
 	}
+	file_close(curr->run_file);
 	curr->next_fd = 3;
 	process_cleanup ();
 }
@@ -535,7 +536,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	success = true;
 done:
    /* We arrive here whether the load is successful or not. */
-   file_close (file);
+   //file_close (file);
    return success;
 }
 
