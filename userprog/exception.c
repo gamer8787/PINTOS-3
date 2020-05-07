@@ -140,8 +140,6 @@ page_fault (struct intr_frame *f) {
 	write = (f->error_code & PF_W) != 0;
 	user = (f->error_code & PF_U) != 0;
 
-	printf("page fault\n");
-
 	exit(-1);
 
 #ifdef VM
