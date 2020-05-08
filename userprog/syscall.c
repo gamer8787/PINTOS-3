@@ -125,11 +125,6 @@ pid_t fork(const char *thread_name) {
 	int len = strlen(thread_name);
 	check_address(thread_name + len);
 
-	if (get_user(thread_name) == -1 || get_user(thread_name + len) == -1)
-	{
-		return TID_ERROR;
-	}
-
 	int child_pid = process_fork(thread_name, &thread_current()->tf);
 	if (child_pid == TID_ERROR) {
 		return TID_ERROR;
