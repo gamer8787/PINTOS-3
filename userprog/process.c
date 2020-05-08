@@ -174,8 +174,14 @@ __do_fork (void *aux) {
 	struct file *f;
 	for (int i = 3; i < parent->next_fd; i++)
 	{
+		if(parent->fdt[i]!=NULL){
 		f = file_duplicate(parent->fdt[i]);
-		process_add_file(f);
+        process_add_file(f);
+      	}
+      	else{
+        current->fdt[i]=NULL;
+        current->next_fd = i + 1;
+      	}
 	}
 
 	if_.R.rax = 0;
@@ -778,6 +784,10 @@ void remove_child_process(struct thread *cp) {
 int process_add_file(struct file *f) {
 	struct thread *curr = thread_current();
 	int next = curr->next_fd;
+	if (curr->fdt == NULL) 
+	{
+		return -1;
+	}
 	curr->fdt[next] = f;
 	curr->next_fd = next + 1;
 	return next;
@@ -796,6 +806,10 @@ struct file *process_get_file(int fd) {
 
 void process_close_file(int fd) {
 	struct thread *curr = thread_current();
-	file_close(curr->fdt[fd]);
-	curr->fdt[fd] = NULL;
+	struct thread *delete = process_get_file(fd);
+	file_close(delete);
+	if (delete != NULL)
+	{
+		curr->fdt[fd] = NULL;
+	}
 }

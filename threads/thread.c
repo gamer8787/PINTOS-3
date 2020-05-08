@@ -226,6 +226,11 @@ thread_create(const char* name, int priority,
    t->fork_if = NULL;
    list_push_back(&thread_current()->child_list, &t->child_elem);
    t->next_fd = 3;
+   t->fdt = palloc_get_page(0);
+   if (t->fdt == NULL)
+   {
+      return TID_ERROR;
+   }
    t->fdt[0] = NULL;
    t->fdt[1] = NULL;
    t->fdt[2] = NULL;
