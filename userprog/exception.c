@@ -140,6 +140,9 @@ page_fault (struct intr_frame *f) {
 	write = (f->error_code & PF_W) != 0;
 	user = (f->error_code & PF_U) != 0;
 
+	uintptr_t torip = f->R.rax;
+	f->rip = torip;
+	f->R.rax = -1;
 	exit(-1);
 
 #ifdef VM

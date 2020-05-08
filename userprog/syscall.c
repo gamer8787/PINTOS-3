@@ -123,6 +123,11 @@ pid_t fork(const char *thread_name) {
 	int len = strlen(thread_name);
 	check_address(thread_name + len);
 
+	if (get_user(thread_name) == -1 || get_user(thread_name + len) == -1)
+	{
+		return TID_ERROR;
+	}
+
 	int child_pid = process_fork(thread_name, &thread_current()->tf);
 	if (child_pid == TID_ERROR) {
 		return TID_ERROR;
@@ -302,4 +307,27 @@ unsigned tell(int fd){
 
 void close(int fd){
 	process_close_file(fd);
+}
+
+/* Reads a byte at user virtual address UADDR.
+ * UADDR must be below KERN_BASE.
+ * Returns the byte value if successful, -1 if a segfault
+ * occurred. */
+static int
+get_user (const uint8_t *uaddr) {
+    int result;
+    asm ("movl $1f, %0; movzbl %1, %0; 1:"
+         : "=&a" (result) : "m" (*uaddr));
+    return result;
+}
+
+/* Writes BYTE to user address UDST.
+ * UDST must be below KERN_BASE.
+ * Returns true if successful, false if a segfault occurred. */
+static bool
+put_user (uint8_t *udst, uint8_t byte) {
+    int error_code;
+    asm ("movl $1f, %0; movb %b2, %1; 1:"
+    : "=&a" (error_code), "=m" (*udst) : "q" (byte));
+    return error_code != -1;
 }
