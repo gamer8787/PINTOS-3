@@ -227,7 +227,7 @@ thread_create(const char* name, int priority,
    list_push_back(&thread_current()->child_list, &t->child_elem);
    t->next_fd = 3;
    //t->fdt = palloc_get_page(0);
-   t->fdt = malloc(sizeof(struct file *) * 2000);
+   t->fdt = malloc(sizeof(struct file *) * 200);
    if (t->fdt == NULL)
    {
       return TID_ERROR;
