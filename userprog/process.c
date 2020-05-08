@@ -287,6 +287,7 @@ process_exit (void) {
 		}
 	}
 	curr->next_fd = 3;
+	palloc_free_page(curr->fdt);
 	file_close(curr->run_file);
 	process_cleanup ();
 }
