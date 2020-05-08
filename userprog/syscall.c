@@ -16,6 +16,8 @@
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 void check_address(void *addr);
+static int get_user (const uint8_t *uaddr);
+static bool put_user (uint8_t *udst, uint8_t byte);
 
 /* System call.
  *

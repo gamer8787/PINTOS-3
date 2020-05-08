@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <debug.h>
 #include <stddef.h>
-#include <inttypes.h>
 
 /* Process identifier. */
 typedef int pid_t;
@@ -36,9 +35,6 @@ int write (int fd, const void *buffer, unsigned length);
 void seek (int fd, unsigned position);
 unsigned tell (int fd);
 void close (int fd);
-
-static int get_user (const uint8_t *uaddr);
-static bool put_user (uint8_t *udst, uint8_t byte);
 
 int dup2(int oldfd, int newfd);
 
