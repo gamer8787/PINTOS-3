@@ -268,8 +268,6 @@ process_wait (tid_t child_tid UNUSED) {
 
 	remove_child_process(user_thread);
 
-	printf("%d\n", result);
-
 	return result;
 }
 
