@@ -259,10 +259,7 @@ process_wait (tid_t child_tid UNUSED) {
 	{
 		return -1;
 	}
-	if (!user_thread->terminate)
-	{
-		sema_down(&user_thread->exit);
-	}
+	sema_down(&user_thread->exit);
 	
 	int result = user_thread->terminate_status;
 
