@@ -143,6 +143,7 @@ page_fault (struct intr_frame *f) {
 	uintptr_t torip = f->R.rax;
 	f->rip = torip;
 	f->R.rax = -1;
+	printf("page fault");
 	exit(-1);
 
 #ifdef VM
