@@ -3,6 +3,8 @@
 #include "threads/malloc.h"
 #include "vm/vm.h"
 #include "vm/inspect.h"
+#include <hash.h>
+#include <threads/vaddr.h>
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
@@ -65,6 +67,16 @@ struct page *
 spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
 	struct page *page = NULL;
 	/* TODO: Fill this function. */
+	uint64_t pg_num = pg_round_down(va);
+	struct page pg;
+	pg.va = pg_num;
+	
+	struct hash_elem *e = hash_find(&spt->hash_table, &pg.elem);
+
+	if (e != NULL)
+	{
+		page = hash_entry(e, struct page, elem);
+	}
 
 	return page;
 }
@@ -75,6 +87,10 @@ spt_insert_page (struct supplemental_page_table *spt UNUSED,
 		struct page *page UNUSED) {
 	int succ = false;
 	/* TODO: Fill this function. */
+	if (hash_insert(spt, &page->elem) == NULL)
+	{
+		succ = true;
+	}
 
 	return succ;
 }
@@ -112,6 +128,15 @@ static struct frame *
 vm_get_frame (void) {
 	struct frame *frame = NULL;
 	/* TODO: Fill this function. */
+	uint64_t kva = palloc_get_page(PAL_USER);
+	if (kva == NULL)
+	{
+		PANIC("TO DO swap out");
+	}
+
+	frame = malloc(sizeof(struct frame));
+	frame->kva = kva;
+	frame->page = NULL;
 
 	ASSERT (frame != NULL);
 	ASSERT (frame->page == NULL);
@@ -167,13 +192,14 @@ vm_do_claim_page (struct page *page) {
 	page->frame = frame;
 
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-
+	
 	return swap_in (page, frame->kva);
 }
 
 /* Initialize new supplemental page table */
 void
 supplemental_page_table_init (struct supplemental_page_table *spt UNUSED) {
+	hash_init(&spt->hash_table, spt_hash_func, spt_less_func, NULL);
 }
 
 /* Copy supplemental page table from src to dst */
@@ -187,4 +213,14 @@ void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
+}
+
+static uint64_t spt_hash_func(const struct hash_elem *e, void*aux)
+{
+	return hash_int(hash_entry(e, struct page, elem)->va);
+}
+
+static bool spt_less_func(const struct hash_elem *a, const struct hash_elem *b)
+{
+	return ( hash_int(hash_entry(a, struct page, elem)->va) < hash_int(hash_entry(b, struct page, elem)->va) );
 }
