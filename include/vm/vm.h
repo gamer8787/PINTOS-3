@@ -14,7 +14,7 @@ enum vm_type {
 	/* page that hold the page cache, for project 4 */
 	VM_PAGE_CACHE = 3,
 
-	/* Bit flags to store state */
+	/* Bit flags to store state */	
 
 	/* Auxillary bit flag marker for store information. You can add more
 	 * markers, until the value is fit in the int. */

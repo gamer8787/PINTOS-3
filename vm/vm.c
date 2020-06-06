@@ -55,7 +55,11 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		/* TODO: Create the page, fetch the initialier according to the VM type,
 		 * TODO: and then create "uninit" page struct by calling uninit_new. You
 		 * TODO: should modify the field after calling the uninit_new. */
-
+		struct uninit_page page;
+		&page->vm_type = VM_TYPE(type);
+		&page->vm_initializer = init;
+		&page->aux = aux;
+		
 		/* TODO: Insert the page into the spt. */
 	}
 err:
@@ -85,9 +89,9 @@ spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
 bool
 spt_insert_page (struct supplemental_page_table *spt UNUSED,
 		struct page *page UNUSED) {
-	int succ = false;
+	bool succ = false;
 	/* TODO: Fill this function. */
-	if (hash_insert(spt, &page->elem) == NULL)
+	if (hash_insert(&spt->hash_table, &page->elem) == NULL)
 	{
 		succ = true;
 	}
@@ -178,9 +182,17 @@ bool
 vm_claim_page (void *va UNUSED) {
 	struct page *page = NULL;
 	/* TODO: Fill this function */
+	
+	page = spt_find_page(&thread_current()->spt, va);
+
+	if (page == NULL)
+	{
+		return false;
+	}
 
 	return vm_do_claim_page (page);
 }
+
 
 /* Claim the PAGE and set up the mmu. */
 static bool
@@ -192,8 +204,9 @@ vm_do_claim_page (struct page *page) {
 	page->frame = frame;
 
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-	
-	return swap_in (page, frame->kva);
+	return spt_insert_page(&thread_current()->spt, page);
+
+	//return swap_in (page, frame->kva);
 }
 
 
