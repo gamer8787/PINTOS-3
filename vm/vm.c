@@ -42,25 +42,27 @@ static struct frame *vm_evict_frame (void);
 /* Create the pending page object with initializer. If you want to create a
  * page, do not create it directly and make it through this function or
  * `vm_alloc_page`. */
-bool
-vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
+bool	//writable?????? not yet
+vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable, 
 		vm_initializer *init, void *aux) {
 
 	ASSERT (VM_TYPE(type) != VM_UNINIT)
 
 	struct supplemental_page_table *spt = &thread_current ()->spt;
-
+	
 	/* Check wheter the upage is already occupied or not. */
 	if (spt_find_page (spt, upage) == NULL) {
 		/* TODO: Create the page, fetch the initialier according to the VM type,
 		 * TODO: and then create "uninit" page struct by calling uninit_new. You
 		 * TODO: should modify the field after calling the uninit_new. */
-		struct uninit_page page;
-		&page->vm_type = VM_TYPE(type);
-		&page->vm_initializer = init;
-		&page->aux = aux;
-		
+		struct page *page;
+		uint64_t kva = palloc_get_page(PAL_USER);
+		if (kva == NULL) {PANIC("panic kva");}
+		enum vm_type t = VM_TYPE(type);
+		bool (*page_initializer)(page, t, kva);
+		uninit_new (page, upage, init, t, aux, page_initializer);
 		/* TODO: Insert the page into the spt. */
+		return spt_insert_page(spt,page);
 	}
 err:
 	return false;
@@ -196,7 +198,7 @@ vm_claim_page (void *va UNUSED) {
 
 /* Claim the PAGE and set up the mmu. */
 static bool
-vm_do_claim_page (struct page *page) {
+ vm_do_claim_page (struct page *page) {
 	struct frame *frame = vm_get_frame ();
 
 	/* Set links */
@@ -204,9 +206,11 @@ vm_do_claim_page (struct page *page) {
 	page->frame = frame;
 
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-	return spt_insert_page(&thread_current()->spt, page);
+	if(!spt_insert_page(&thread_current()->spt, page)){
+		return false;
+	}
 
-	//return swap_in (page, frame->kva);
+	return swap_in (page, frame->kva);
 }
 
 
@@ -234,7 +238,7 @@ static uint64_t spt_hash_func(const struct hash_elem *e, void*aux)
 	return hash_int(hash_entry(e, struct page, elem)->va);
 }
 
-static bool spt_less_func(const struct hash_elem *a, const struct hash_elem *b)
+static bool spt_less_func(const struct hash_elem *a, const struct hash_elem *b, void*aux)
 {
 	return ( hash_int(hash_entry(a, struct page, elem)->va) < hash_int(hash_entry(b, struct page, elem)->va) );
 }

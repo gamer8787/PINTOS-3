@@ -18,6 +18,7 @@ static void uninit_destroy (struct page *page);
 static const struct page_operations uninit_ops = {
 	.swap_in = uninit_initialize,
 	.swap_out = NULL,
+
 	.destroy = uninit_destroy,
 	.type = VM_UNINIT,
 };
@@ -52,6 +53,7 @@ uninit_initialize (struct page *page, void *kva) {
 	void *aux = uninit->aux;
 
 	/* TODO: You may need to fix this function. */
+	
 	return uninit->page_initializer (page, uninit->type, kva) &&
 		(init ? init (page, aux) : true);
 }
