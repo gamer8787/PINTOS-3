@@ -2,5 +2,6 @@
     "files.associations": {
         "__mutex_base": "c",
         "*.inc": "c"
-    }
+    },
+    "C_Cpp.dimInactiveRegions": false
 }

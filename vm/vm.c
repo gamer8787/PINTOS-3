@@ -38,7 +38,6 @@ page_get_type (struct page *page) {
 static struct frame *vm_get_victim (void);
 static bool vm_do_claim_page (struct page *page);
 static struct frame *vm_evict_frame (void);
-
 /* Create the pending page object with initializer. If you want to create a
  * page, do not create it directly and make it through this function or
  * `vm_alloc_page`. */
@@ -55,11 +54,18 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		/* TODO: Create the page, fetch the initialier according to the VM type,
 		 * TODO: and then create "uninit" page struct by calling uninit_new. You
 		 * TODO: should modify the field after calling the uninit_new. */
-		struct page *page;
-		uint64_t kva = palloc_get_page(PAL_USER);
-		if (kva == NULL) {PANIC("panic kva");}
+		struct page *page = NULL ;
+		page = malloc(sizeof(struct page));
+		//uint64_t kva = palloc_get_page(PAL_USER);
+		//if (kva == NULL) {PANIC("panic kva");}
 		enum vm_type t = VM_TYPE(type);
-		bool (*page_initializer)(page, t, kva);
+		bool *page_initializer;
+		if(t==1){
+			page_initializer = anon_initializer;
+		}
+		else if(t==2){
+			page_initializer = file_map_initializer;
+		}
 		uninit_new (page, upage, init, t, aux, page_initializer);
 		/* TODO: Insert the page into the spt. */
 		return spt_insert_page(spt,page);
@@ -167,7 +173,7 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	struct page *page = NULL;
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-
+	
 	return vm_do_claim_page (page);
 }
 
@@ -206,7 +212,7 @@ vm_do_claim_page (struct page *page) {
 	page->frame = frame;
 
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-	if(!spt_insert_page(&thread_current()->spt, page)){
+	if(!spt_insert_page(&thread_current()->spt, page)){  //고쳐야 될수도 있음
 		return false;
 	}
 
