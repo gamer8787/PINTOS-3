@@ -56,8 +56,6 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		 * TODO: should modify the field after calling the uninit_new. */
 		struct page *page = NULL ;
 		page = malloc(sizeof(struct page));
-		//uint64_t kva = palloc_get_page(PAL_USER);
-		//if (kva == NULL) {PANIC("panic kva");}
 		enum vm_type t = VM_TYPE(type);
 		bool *page_initializer;
 		if(t==1){
@@ -67,6 +65,8 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 			page_initializer = file_map_initializer;
 		}
 		uninit_new (page, upage, init, t, aux, page_initializer);
+		page-> writable =  writable;
+		page-> silhum =87;
 		/* TODO: Insert the page into the spt. */
 		return spt_insert_page(spt,page);
 	}
@@ -89,10 +89,9 @@ spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
 	{
 		page = hash_entry(e, struct page, elem);
 	}
-
 	return page;
 }
-
+ 
 /* Insert PAGE into spt with validation. */
 bool
 spt_insert_page (struct supplemental_page_table *spt UNUSED,
@@ -103,7 +102,6 @@ spt_insert_page (struct supplemental_page_table *spt UNUSED,
 	{
 		succ = true;
 	}
-
 	return succ;
 }
 
@@ -173,31 +171,31 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	struct page *page = NULL;
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-	
+	page = spt_find_page(spt, pg_round_down (addr));
+	if(page ==NULL){
+		return false;
+	}
+
 	return vm_do_claim_page (page);
 }
-
 /* Free the page.
  * DO NOT MODIFY THIS FUNCTION. */
 void
 vm_dealloc_page (struct page *page) {
 	destroy (page);
 	free (page);
-}
+} 
 
 /* Claim the page that allocate on VA. */
 bool
 vm_claim_page (void *va UNUSED) {
 	struct page *page = NULL;
 	/* TODO: Fill this function */
-	
 	page = spt_find_page(&thread_current()->spt, va);
-
 	if (page == NULL)
 	{
 		return false;
 	}
-
 	return vm_do_claim_page (page);
 }
 
@@ -212,12 +210,12 @@ vm_do_claim_page (struct page *page) {
 	page->frame = frame;
 
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-	if(!spt_insert_page(&thread_current()->spt, page)){  //고쳐야 될수도 있음
-		return false;
-	}
+	//spt_insert_page(&thread_current()->spt, page);  
+	pml4_set_page (thread_current()->pml4, page->va, frame->kva, page->writable);
 
 	return swap_in (page, frame->kva);
 }
+
 
 
 /* Initialize new supplemental page table */

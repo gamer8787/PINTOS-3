@@ -33,7 +33,12 @@ struct page_operations;
 struct thread;
 
 #define VM_TYPE(type) ((type) & 7)
-
+struct information {
+	struct file *file;
+	off_t ofs;
+	size_t page_read_bytes;
+	size_t page_zero_bytes;
+};
 /* The representation of "page".
  * This is kind of "parent class", which has four "child class"es, which are
  * uninit_page, file_page, anon_page, and page cache (project4).
@@ -42,8 +47,9 @@ struct page {
 	const struct page_operations *operations;
 	void *va;              /* Address in terms of user space */
 	struct frame *frame;   /* Back reference for frame */
-
+	bool writable;
 	/* Your implementation */
+	int silhum;
 	struct hash_elem elem; 
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */

@@ -74,7 +74,6 @@ initd (void *f_name) {
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
 	process_init ();
-
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
 	NOT_REACHED ();
@@ -145,7 +144,6 @@ __do_fork (void *aux) {
 	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
 	struct intr_frame *parent_if = parent->fork_if;
 	bool succ = true;
-
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
 
@@ -226,7 +224,6 @@ process_exec (void *f_name) {
 
 	/* And then load the binary */
 	success = load (file_name, &_if);
-
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
@@ -399,7 +396,6 @@ load (const char *file_name, struct intr_frame *if_) {
 	off_t file_ofs;
 	bool success = false;
 	int i;
-
 	char* token, * save_ptr;
    	char* parse[64] = { NULL, };
    	token = strtok_r(file_name, " ", &save_ptr);
@@ -493,16 +489,15 @@ load (const char *file_name, struct intr_frame *if_) {
             break;
       	}
    	}
-
    /* Set up stack. */
-   	if (!setup_stack (if_))
+   	if (!setup_stack (if_)){
     	goto done;
-
+	   }
    /* Start address. */
    	if_->rip = ehdr.e_entry;
-
    /* TODO: Your code goes here.
     * TODO: Implement argument passing (see project2/argument_passing.html). */
+	
     int lensum = 0;
 	void** rsp = &if_->rsp;
 	for (int i = a - 2; i > -1; i--) {
@@ -510,7 +505,6 @@ load (const char *file_name, struct intr_frame *if_) {
         	*rsp = *rsp - 1;
         	**(char**)rsp = parse[i][j];
     	}
-
 		lensum += strlen(parse[i]) + 1;
 		parse[i] = *rsp;
 	}
@@ -520,7 +514,6 @@ load (const char *file_name, struct intr_frame *if_) {
 		*rsp = *rsp - 1;
 		**(uint8_t**)rsp = 0;
 	}
-
 	*rsp = *rsp - 8;
 	**(char***)rsp = 0;
 
@@ -528,17 +521,16 @@ load (const char *file_name, struct intr_frame *if_) {
 		*rsp = *rsp - 8;
 		**(char***)rsp = parse[i];
 	}
-
 	if_->R.rdi = a - 1;
 	if_->R.rsi = *rsp;
 
 	*rsp = *rsp - 8;
 	**(void***)rsp = 0;
-
 	success = true;
 done:
    /* We arrive here whether the load is successful or not. */
    //file_close (file);
+   
    return success;
 }
 
@@ -695,6 +687,18 @@ lazy_load_segment (struct page *page, void *aux) {
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
+	//struct information *aux = NULL ;
+	struct information *information = aux;
+	struct file *file = information->file;
+	off_t ofs = information->ofs;
+	size_t page_read_bytes = information -> page_read_bytes;
+	size_t page_zero_bytes = information -> page_zero_bytes;
+	
+	if(file_read_at (file, page->frame->kva , page_read_bytes, ofs) != page_read_bytes){
+		return false;
+	}
+	memset ( page->frame->kva + page_read_bytes , 0, page_zero_bytes);
+	return true;
 }
 
 /* Loads a segment starting at offset OFS in FILE at address
@@ -726,12 +730,19 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
-		void *aux = NULL;
+		struct information *aux = NULL ;
+		aux = malloc(sizeof(struct information));
+		aux->file = file;
+		aux->ofs = ofs;
+		aux->page_read_bytes = page_read_bytes;
+		aux->page_zero_bytes = page_zero_bytes;
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
 					writable, lazy_load_segment, aux))
 			return false;
-
+		//ofs += PGSIZE; 
+		
 		/* Advance. */
+		ofs += page_read_bytes;
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
 		upage += PGSIZE;
@@ -746,14 +757,14 @@ setup_stack (struct intr_frame *if_) {
 	void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
 	/* TODO: Map the stack on stack_bottom and claim the page immediately.
 	 * TODO: If success, set the rsp accordingly.
-	 * TODO: You should mark the page is stack. */
+	 * TODO: You should mark the page is stack. */ //mark하기
 	/* TODO: Your code goes here */
-	void *aux = NULL;
-	vm_alloc_page_with_initializer (VM_ANON, stack_bottom, true, anon_initializer, aux);
+	vm_alloc_page_with_initializer(VM_ANON+VM_MARKER_0, stack_bottom, true, NULL, NULL);
 	if(!vm_claim_page(stack_bottom)){
 		return success;
 	}
-	if_->rsp = stack_bottom;
+	if_->rsp = USER_STACK;
+	success = true;
 	return success;
 }
 #endif /* VM */
