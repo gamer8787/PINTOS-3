@@ -156,7 +156,8 @@ __do_fork (void *aux) {
 
 	process_activate (current);
 #ifdef VM
-	supplemental_page_table_init (&current->spt);
+	printf("ter_status is %s \n",&current->name);
+	//supplemental_page_table_init (&current->spt);
 	if (!supplemental_page_table_copy (&current->spt, &parent->spt))
 		goto error;
 #else
@@ -184,7 +185,6 @@ __do_fork (void *aux) {
 
 	if_.R.rax = 0;
 	current->copied = true;
-	supplemental_page_table_copy(&parent->spt,&current->spt);
 	sema_up(&current->fork);
 	process_init ();
 
@@ -221,7 +221,8 @@ process_exec (void *f_name) {
 
 	/* We first kill the current context */
 	process_cleanup ();
-
+	
+	//supplemental_page_table_init (&thread_current ()->spt);
 	/* And then load the binary */
 	success = load (file_name, &_if);
 	/* If load failed, quit. */
@@ -284,7 +285,6 @@ process_exit (void) {
 	free(curr->fdt);
 	//palloc_free_page(curr->fdt);
 	file_close(curr->run_file);
-	supplemental_page_table_kill(&curr->spt);
 	process_cleanup ();
 }
 

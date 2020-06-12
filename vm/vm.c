@@ -231,14 +231,14 @@ supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		struct supplemental_page_table *src UNUSED) {
 	
 	struct hash_iterator i;
-
+	printf("ter_status is %s \n",&thread_current()->name);
 	hash_first (&i, &src->hash_table);
 	while (hash_next (&i)){	
 		struct page *page = hash_entry (hash_cur (&i), struct page, elem);
 		vm_alloc_page_with_initializer (page->type, page->va, page->writable, page->uninit.init, page->uninit.aux);
-		if(page->is_uninit_init){
-			vm_claim_page(page->va);
-		}
+		//printf("here\n");
+		bool i = vm_claim_page(page->va);
+		//printf("bool is %d\n",i);
 	}		
 }
 
@@ -253,6 +253,7 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 		struct page *page = hash_entry (hash_cur (&i), struct page, elem);
 		destroy(page);
 	}	
+	supplemental_page_table_init(spt);
 }
 
 static uint64_t spt_hash_func(const struct hash_elem *e, void*aux)

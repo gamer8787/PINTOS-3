@@ -67,7 +67,7 @@ uninit_destroy (struct page *page) {
 	struct uninit_page *uninit UNUSED = &page->uninit;
 	/* TODO: Fill this function.
 	 * TODO: If you don't have anything to do, just return. */
-	if(VM_TYPE(page->type) == VM_ANON){
-		free(uninit);
-	}
+	//if(VM_TYPE(page->type) == VM_ANON){
+		//vm_dealloc_page(page);
+	//}
 }
