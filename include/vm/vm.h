@@ -47,7 +47,10 @@ struct page {
 	const struct page_operations *operations;
 	void *va;              /* Address in terms of user space */
 	struct frame *frame;   /* Back reference for frame */
+	
 	bool writable;
+	enum vm_type type;
+	bool is_uninit_init;
 	/* Your implementation */
 	int silhum;
 	struct hash_elem elem; 

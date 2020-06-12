@@ -102,12 +102,20 @@ syscall_handler (struct intr_frame *f UNUSED) {
 			break;
 	}
 }
-
+ 
 void check_address(void *addr){
 	if (is_kernel_vaddr(addr)) {
 		exit(-1);
 	}
-}
+	#ifdef VM
+	struct supplemental_page_table *spt UNUSED = &thread_current ()->spt;
+	struct page *page = NULL;
+	page = spt_find_page(spt, pg_round_down (addr));
+	if(page==NULL){
+		exit(-1);
+	}
+	#endif
+}  
 
 void halt(void) {
 	power_off();

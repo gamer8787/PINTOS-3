@@ -184,8 +184,8 @@ __do_fork (void *aux) {
 
 	if_.R.rax = 0;
 	current->copied = true;
+	supplemental_page_table_copy(&parent->spt,&current->spt);
 	sema_up(&current->fork);
-
 	process_init ();
 
 	/* Finally, switch to the newly created process. */
@@ -284,6 +284,7 @@ process_exit (void) {
 	free(curr->fdt);
 	//palloc_free_page(curr->fdt);
 	file_close(curr->run_file);
+	supplemental_page_table_kill(&curr->spt);
 	process_cleanup ();
 }
 

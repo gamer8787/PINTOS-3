@@ -41,7 +41,7 @@ static struct frame *vm_evict_frame (void);
 /* Create the pending page object with initializer. If you want to create a
  * page, do not create it directly and make it through this function or
  * `vm_alloc_page`. */
-bool	//writable?????? not yet
+bool		
 vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable, 
 		vm_initializer *init, void *aux) {
 
@@ -66,7 +66,8 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		}
 		uninit_new (page, upage, init, t, aux, page_initializer);
 		page-> writable =  writable;
-		page-> silhum =87;
+		page-> type = type;
+		page->is_uninit_init=false;
 		/* TODO: Insert the page into the spt. */
 		return spt_insert_page(spt,page);
 	}
@@ -228,6 +229,17 @@ supplemental_page_table_init (struct supplemental_page_table *spt UNUSED) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		struct supplemental_page_table *src UNUSED) {
+	
+	struct hash_iterator i;
+
+	hash_first (&i, &src->hash_table);
+	while (hash_next (&i)){	
+		struct page *page = hash_entry (hash_cur (&i), struct page, elem);
+		vm_alloc_page_with_initializer (page->type, page->va, page->writable, page->uninit.init, page->uninit.aux);
+		if(page->is_uninit_init){
+			vm_claim_page(page->va);
+		}
+	}		
 }
 
 /* Free the resource hold by the supplemental page table */
@@ -235,6 +247,12 @@ void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
+	struct hash_iterator i;
+	hash_first (&i, &spt->hash_table);
+	while (hash_next (&i)){	
+		struct page *page = hash_entry (hash_cur (&i), struct page, elem);
+		destroy(page);
+	}	
 }
 
 static uint64_t spt_hash_func(const struct hash_elem *e, void*aux)
