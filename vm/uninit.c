@@ -70,4 +70,5 @@ uninit_destroy (struct page *page) {
 	//if(VM_TYPE(page->type) == VM_ANON){
 		//vm_dealloc_page(page);
 	//}
+	//printf("hi\n");
 }

@@ -156,8 +156,9 @@ __do_fork (void *aux) {
 
 	process_activate (current);
 #ifdef VM
-	printf("ter_status is %s \n",&current->name);
-	//supplemental_page_table_init (&current->spt);
+	//printf("ter_status is %s \n",&current->name);
+	//printf("ter_status is %s \n",&thread_current()->parent_thread->name);
+	supplemental_page_table_init (&current->spt); //원래있엇음
 	if (!supplemental_page_table_copy (&current->spt, &parent->spt))
 		goto error;
 #else
@@ -696,6 +697,7 @@ lazy_load_segment (struct page *page, void *aux) {
 	size_t page_zero_bytes = information -> page_zero_bytes;
 	
 	if(file_read_at (file, page->frame->kva , page_read_bytes, ofs) != page_read_bytes){
+		
 		return false;
 	}
 	memset ( page->frame->kva + page_read_bytes , 0, page_zero_bytes);
@@ -760,7 +762,9 @@ setup_stack (struct intr_frame *if_) {
 	 * TODO: If success, set the rsp accordingly.
 	 * TODO: You should mark the page is stack. */ //mark하기
 	/* TODO: Your code goes here */
-	vm_alloc_page_with_initializer(VM_ANON+VM_MARKER_0, stack_bottom, true, NULL, NULL);
+	if(!vm_alloc_page_with_initializer(VM_ANON+VM_MARKER_0, stack_bottom, true, NULL, NULL)){
+		return success;
+	}
 	if(!vm_claim_page(stack_bottom)){
 		return success;
 	}

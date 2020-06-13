@@ -2,7 +2,7 @@
 
 #include "vm/vm.h"
 #include "devices/disk.h"
-
+#include <threads/vaddr.h>
 /* DO NOT MODIFY BELOW LINE */
 static struct disk *swap_disk;
 static bool anon_swap_in (struct page *page, void *kva);
@@ -50,5 +50,15 @@ anon_swap_out (struct page *page) {
 static void
 anon_destroy (struct page *page) {
 	struct anon_page *anon_page = &page->anon;
-	//vm_dealloc_page(page);
+		//free(page->frame); 
+	/*
+	if(page->frame->is_alloc){
+		printf("kva is %d\n",page->frame->kva==NULL);
+		printf("sizeof kva is %d\n",sizeof(page->frame->kva));
+		//printf("frame is %x\n",page->frame);
+		//free(page->frame);
+		palloc_free_page(page->frame->kva);
+		printf("yes\n");
+	}
+	*/
 }	

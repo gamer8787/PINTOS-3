@@ -70,6 +70,7 @@ struct page {
 struct frame {
 	void *kva;
 	struct page *page;
+	bool is_alloc;
 };
 
 /* The function table for page operations.
