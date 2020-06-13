@@ -172,9 +172,10 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	struct page *page = NULL;
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
+	check_address(addr);
 	page = spt_find_page(spt, pg_round_down (addr));
 	if(page ==NULL){
-		return false;
+		return false; 
 	}
 
 	return vm_do_claim_page (page);
@@ -238,12 +239,14 @@ supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		bool  writable = page->writable;
 		vm_initializer *init =  page->uninit.init;
 		void *aux = page->uninit.aux;
-		if(!vm_alloc_page_with_initializer (type, va, writable, init, aux))
+		if(!vm_alloc_page_with_initializer (type, va, writable, init, aux)){
+			
 			return false;
+		}
 		void *newpage;
 		if(page->is_uninit_init){
 			newpage = palloc_get_page(PAL_USER);
-			if (newpage == NULL) {
+			if (newpage == NULL) {			
 				return false;
 			}
 			memcpy(newpage, page->frame->kva, PGSIZE);
