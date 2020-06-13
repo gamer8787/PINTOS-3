@@ -98,7 +98,6 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 	void *parent_page;
 	void *newpage;
 	bool writable;
-
 	/* 1. TODO: If the parent_page is kernel page, then return immediately. */
 	if (is_kern_pte(pte))
 	{
@@ -156,11 +155,12 @@ __do_fork (void *aux) {
 
 	process_activate (current);
 #ifdef VM
-	//printf("ter_status is %s \n",&current->name);
-	//printf("ter_status is %s \n",&thread_current()->parent_thread->name);
+
 	supplemental_page_table_init (&current->spt); //원래있엇음
-	if (!supplemental_page_table_copy (&current->spt, &parent->spt))
+	if (!supplemental_page_table_copy (&current->spt, &parent->spt)){
 		goto error;
+	}
+
 #else
 	if (!pml4_for_each (parent->pml4, duplicate_pte, parent))
 		goto error;
@@ -188,7 +188,6 @@ __do_fork (void *aux) {
 	current->copied = true;
 	sema_up(&current->fork);
 	process_init ();
-
 	/* Finally, switch to the newly created process. */
 	if (succ)
 	{

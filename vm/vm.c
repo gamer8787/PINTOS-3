@@ -68,7 +68,6 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		page-> writable =  writable;
 		page-> type = type;
 		page->is_uninit_init=false;
-		printf("name is %s\n",&thread_current()->name);
 		/* TODO: Insert the page into the spt. */
 		return spt_insert_page(spt,page);
 	}
@@ -81,19 +80,14 @@ struct page *
 spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
 	struct page *page = NULL;
 	/* TODO: Fill this function. */
-	printf("1111111\n");
 	uint64_t pg_num = pg_round_down(va);
-	printf("222222222\n");
 	struct page pg;
 	pg.va = pg_num;
-	printf("2424242424\n");
 	struct hash_elem *e = hash_find(&spt->hash_table, &pg.elem);
-	printf("333333333\n");
 	if (e != NULL)
 	{
 		page = hash_entry(e, struct page, elem);
 	}
-	printf("444444444\n");
 	return page;
 }
  
@@ -239,36 +233,28 @@ supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 	hash_first (&i, &src->hash_table);
 	while (hash_next (&i)){	
 		struct page *page = hash_entry (hash_cur (&i), struct page, elem);
-		//printf("page->frame->kva  is %x \n",page->frame->kva);
 		enum vm_type type =page->type;
 		void *va = page->va;
 		bool  writable = page->writable;
 		vm_initializer *init =  page->uninit.init;
 		void *aux = page->uninit.aux;
-		//printf("name is %s\n",&thread_current()->name);
-		vm_alloc_page_with_initializer (type, va, writable, init, aux);
-		printf("under vm_alloc\n");
-
+		if(!vm_alloc_page_with_initializer (type, va, writable, init, aux))
+			return false;
+		void *newpage;
 		if(page->is_uninit_init){
-			struct page *copy_page = NULL;
-			printf("here?\n");
-			copy_page = spt_find_page(&dst, va);
-			
-			if (copy_page == NULL){
+			newpage = palloc_get_page(PAL_USER);
+			if (newpage == NULL) {
 				return false;
 			}
-			struct frame *frame = page->frame;
-			/* Set links */
-			frame->page = copy_page;
-			copy_page->frame = frame;
-
-			/* TODO: Insert page table entry to map page's VA to frame's PA. */
-			//spt_insert_page(&thread_current()->spt, page);  
-			pml4_set_page (thread_current()->pml4, copy_page->va, frame->kva, copy_page->writable);
-
-			return swap_in (copy_page, frame->kva);
+			memcpy(newpage, page->frame->kva, PGSIZE);
+			writable = page->writable;
+			if (!pml4_set_page (thread_current()->pml4, va, newpage, writable)) {
+				palloc_free_page(newpage);
+				return false;
+			}
 		}
 	}
+	return true;
 }
 
 /* Free the resource hold by the supplemental page table */
@@ -276,12 +262,15 @@ void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
+	if(hash_empty(&spt->hash_table)){
+		return;
+	}
 	struct hash_iterator i;
 	hash_first (&i, &spt->hash_table);
 	while (hash_next (&i)){	
 		struct page *page = hash_entry (hash_cur (&i), struct page, elem);
 		destroy(page);
-	}	
+	}	  
 	supplemental_page_table_init(spt);
 }
 
