@@ -157,11 +157,13 @@ vm_get_frame (void) {
 /* Growing the stack. */
 static void
 vm_stack_growth (void *addr UNUSED) {
+	vm_claim_page(addr);
 }
 
 /* Handle the fault on write_protected page */
 static bool
 vm_handle_wp (struct page *page UNUSED) {
+	return true;
 }
 
 /* Return true on success */
@@ -172,12 +174,34 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	struct page *page = NULL;
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-	check_address(addr);
+	//printf("addr is %p\n",addr);
+	//printf("rsp  is %p\n",f->rsp);	
+	//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
+	//void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
+	printf("%p, %p\n", f->rsp, addr);
 	page = spt_find_page(spt, pg_round_down (addr));
-	if(page ==NULL){
+	//check_address(addr);
+	
+	if(page == NULL){
+		
+		void * a= addr;
+		printf("minus is  %p\n",a);
+		if(f->rsp - ((uintptr_t )pg_round_down(addr)) <= PGSIZE*250){
+			printf("hi\n");
+			while(f->rsp - ((uintptr_t )pg_round_down(addr)) <= PGSIZE*250){
+				vm_stack_growth(pg_round_down (addr));
+			}
+		}
+		printf("%p, %p\n", f->rsp, pg_round_down(addr));
+		check_address(addr);
 		return false; 
 	}
-
+	
+	if(not_present){
+		vm_stack_growth(addr);
+		
+	}
+	
 	return vm_do_claim_page (page);
 }
 /* Free the page.
@@ -240,7 +264,6 @@ supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		vm_initializer *init =  page->uninit.init;
 		void *aux = page->uninit.aux;
 		if(!vm_alloc_page_with_initializer (type, va, writable, init, aux)){
-			
 			return false;
 		}
 		void *newpage;
@@ -286,3 +309,4 @@ static bool spt_less_func(const struct hash_elem *a, const struct hash_elem *b, 
 {
 	return ( hash_int(hash_entry(a, struct page, elem)->va) < hash_int(hash_entry(b, struct page, elem)->va) );
 }
+   

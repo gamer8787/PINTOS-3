@@ -148,6 +148,7 @@ page_fault (struct intr_frame *f) {
 #endif
 	/* Count page faults. */
 	page_fault_cnt++;
+	//printf("%p, %p\n", f->rsp, fault_addr);
 	/*
 	uintptr_t torip = f->R.rax;
 	f->rip = torip;
