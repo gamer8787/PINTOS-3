@@ -53,6 +53,7 @@ uninit_initialize (struct page *page, void *kva) {
 	void *aux = uninit->aux;
 
 	/* TODO: You may need to fix this function. */
+	page->is_uninit_init=true;
 	return uninit->page_initializer (page, uninit->type, kva) &&
 		(init ? init (page, aux) : true);
 }
