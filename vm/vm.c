@@ -157,7 +157,10 @@ vm_get_frame (void) {
 /* Growing the stack. */
 static void
 vm_stack_growth (void *addr UNUSED) {
-	vm_claim_page(addr);
+	bool a= vm_alloc_page_with_initializer(VM_ANON+VM_MARKER_0, addr, true, NULL, NULL);
+	//printf("a is %d\n",a);
+	bool i =vm_claim_page(addr);
+	//printf("i is %d\n",i);
 }
 
 /* Handle the fault on write_protected page */
@@ -176,32 +179,37 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	/* TODO: Your code goes here */
 	//printf("addr is %p\n",addr);
 	//printf("rsp  is %p\n",f->rsp);	
-	//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
 	//void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
-	printf("%p, %p\n", f->rsp, addr);
+	
 	page = spt_find_page(spt, pg_round_down (addr));
 	//check_address(addr);
-	
-	if(page == NULL){
-		
-		void * a= addr;
-		printf("minus is  %p\n",a);
-		if(f->rsp - ((uintptr_t )pg_round_down(addr)) <= PGSIZE*250){
-			printf("hi\n");
-			while(f->rsp - ((uintptr_t )pg_round_down(addr)) <= PGSIZE*250){
-				vm_stack_growth(pg_round_down (addr));
+	//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
+	if(page ==NULL){
+		if(not_present){
+			void * a= (void *)(f->rsp - ((uintptr_t )pg_round_down(addr)));
+			void * b= (void *)(f->rsp - ((uintptr_t )pg_round_down(addr)));
+			if(0 <= a && a <= PGSIZE*250){
+				printf("hy!\n");
+				printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
+				printf("%p\n",a);
+				while(f->rsp >= ((uintptr_t )pg_round_down(addr) ) ){
+					vm_stack_growth(pg_round_down(addr));
+					addr += PGSIZE;
+					printf("222222\n");
+					//printf("a is %x\n",a);
+				}
+			}  
+			else {
+				printf("1111111\n");
+				check_address(addr);
 			}
+			return true; 
 		}
-		printf("%p, %p\n", f->rsp, pg_round_down(addr));
-		check_address(addr);
-		return false; 
+		else{
+			return false;
+		}
 	}
-	
-	if(not_present){
-		vm_stack_growth(addr);
-		
-	}
-	
+
 	return vm_do_claim_page (page);
 }
 /* Free the page.
@@ -264,6 +272,7 @@ supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		vm_initializer *init =  page->uninit.init;
 		void *aux = page->uninit.aux;
 		if(!vm_alloc_page_with_initializer (type, va, writable, init, aux)){
+			
 			return false;
 		}
 		void *newpage;
