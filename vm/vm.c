@@ -177,8 +177,9 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	struct page *page = NULL;
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-	page = spt_find_page(spt, pg_round_down (addr));
 	//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
+	page = spt_find_page(spt, pg_round_down (addr));
+	
 	//printf("fault 111\n");
 	if(page ==NULL){
 		if(not_present){

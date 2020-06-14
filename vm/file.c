@@ -49,7 +49,7 @@ file_map_destroy (struct page *page) {
 /* Do the mmap */
 void *
 do_mmap (void *addr, size_t length, int writable,
-		struct file *file, off_t offset) {
+		struct file *file, off_t offset) {	
 	return mmap(addr,length,writable,file,offset);
 }
 

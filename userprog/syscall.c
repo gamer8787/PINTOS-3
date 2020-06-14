@@ -99,7 +99,7 @@ syscall_handler (struct intr_frame *f UNUSED) {
 			close(reg.rdi);
 			break;
 		case SYS_MMAP:
-			mmap(reg.rdi, reg.rsi, reg.rdx, reg.r10, reg.r8);
+			f->R.rax = mmap(reg.rdi, reg.rsi, reg.rdx, reg.r10, reg.r8);
 		case SYS_MUNMAP:
 			munmap(reg.rdi);
 		default:
@@ -345,9 +345,9 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
 	off_t ofs =offset;
 	if(length ==0 ){
 		return  NULL;
-	}
+	} 
 	if(addr == 0){
-		return  NULL;
+		return NULL;
 	}
 	if(pg_ofs (addr) != 0){
 		return NULL;
