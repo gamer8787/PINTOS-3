@@ -343,13 +343,17 @@ lazy_load_mmap (struct page *page, void *aux) {
 void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
 	void  *temp = addr;
 	off_t ofs =offset;
+	//printf("kerner? %d\n",is_kernel_vaddr(addr));
 	if(length ==0 ){
 		return  NULL;
 	} 
-	if(addr == 0){
+	if(addr == 0){ 
 		return NULL;
 	}
 	if(pg_ofs (addr) != 0){
+		return NULL;
+	}
+	if(pg_ofs (offset) != 0){
 		return NULL;
 	}
 	struct file *file = process_get_file(fd);
