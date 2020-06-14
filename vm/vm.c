@@ -177,38 +177,35 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	struct page *page = NULL;
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-	//printf("addr is %p\n",addr);
-	//printf("rsp  is %p\n",f->rsp);	
-	//void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
 	page = spt_find_page(spt, pg_round_down (addr));
 	//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
+	//printf("fault 111\n");
 	if(page ==NULL){
 		if(not_present){
+			printf("fault 2222\n");
 			void * a= (void *)(((uintptr_t )addr) - f->rsp );
-			/*
-			printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
-			printf("%p\n",a);
-			printf("%d\n",sizeof(&addr));*/
 			if(0xfffffffffffff000 < a || a <= PGSIZE*250){
 				while(f->rsp > ((uintptr_t )addr ) ) { //아직 잘 모름 4096
 					vm_stack_growth(pg_round_down(addr));
 					addr += PGSIZE;
-					//printf("hy!\n");
-					//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
 				}
-				//printf("2222222222\n");
+				return true;
 			}  
 			else {
-				check_address(addr);
+				//printf("fault 3333\n");
+				
+				//check_address(addr);
 			}
-			//printf("333333333333\n");
-			return true; 
 		}
 		else{
-			return false;
+			//return false;
 		}
 	}
-
+	else{
+		printf("not null\n");
+	}
+	printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
+	//bool i = vm_do_claim_page (page);
 	return vm_do_claim_page (page);
 }
 /* Free the page.
@@ -245,7 +242,7 @@ vm_do_claim_page (struct page *page) {
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
 	//spt_insert_page(&thread_current()->spt, page);  
 	pml4_set_page (thread_current()->pml4, page->va, frame->kva, page->writable);
-
+	printf("in  do claime page\n");
 	return swap_in (page, frame->kva);
 }
 

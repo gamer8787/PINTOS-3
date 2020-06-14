@@ -12,7 +12,6 @@
 #include "filesys/file.h"
 #include "filesys/filesys.h"
 #include <string.h>
-#include <process.h>
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -319,8 +318,31 @@ void close(int fd){
 	process_close_file(fd);
 }
 
+static bool
+lazy_load_mmap (struct page *page, void *aux) {
+	/* TODO: Load the segment from the file */
+	/* TODO: This called when the first page fault occurs on address VA. */
+	/* TODO: VA is available when calling this function. */
+	struct information *information = aux;
+	struct file *file = information->file;
+	off_t ofs = information->ofs;
+	size_t page_read_bytes = information -> page_read_bytes;
+	size_t page_zero_bytes = information -> page_zero_bytes;
+	void *addr = information -> addr;
+	printf("page_read_bytes is %d\n",page_read_bytes);
+	printf("null? %d\n",file==NULL);
+	off_t a = file_read_at (file, addr, page_read_bytes, ofs);
+	printf("a is %d\n",a);
+	if(file_read_at (file, addr, page_read_bytes, ofs) != page_read_bytes){
+		printf("here!!!!!!!\n");
+		return false;
+	}
+	printf("here!!!!!!!\n");
+	memset ( addr + page_read_bytes , 0, page_zero_bytes);
+	return true;
+}
 void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
-	size_t temp = length;
+	void  *temp = addr;
 	off_t ofs =offset;
 	if(length ==0 ){
 		return  NULL;
@@ -332,21 +354,10 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
 		return NULL;
 	}
 	struct file *file = process_get_file(fd);
-	size_t page_read_bytes;
-	size_t page_zero_bytes;
-	while(length>0){
-		page_read_bytes = length < PGSIZE ? length : PGSIZE;
-		page_zero_bytes = PGSIZE - length;
-		if(file_read_at (file, addr , page_read_bytes, offset) != page_read_bytes){
-			return false;
-		}
-		offset += page_read_bytes;
-		length -= page_read_bytes;	
-	}
-	memset ( addr + ofs, 0, page_zero_bytes);
-	uint32_t zero_bytes = page_zero_bytes;
-	uint32_t read_bytes = temp;
-	uint8_t *upage = addr;
+	printf("lenghh is %d\n",length);
+	printf("offset is %d\n",offset);
+	uint32_t read_bytes = length;
+	uint32_t zero_bytes = (read_bytes % PGSIZE)? 0 : PGSIZE - pg_ofs(length);
 	while (read_bytes > 0 || zero_bytes > 0) {
 		/* Do calculate how to fill this page.
 		 * We will read PAGE_READ_BYTES bytes from FILE
@@ -358,23 +369,29 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
 		struct information *aux = NULL ;
 		aux = malloc(sizeof(struct information));
 		aux->file = file;
-		aux->ofs = ofs;
+		aux->ofs = offset;
 		aux->page_read_bytes = page_read_bytes;
 		aux->page_zero_bytes = page_zero_bytes;
-		if (!vm_alloc_page_with_initializer (VM_FILE, upage, writable, lazy_load_segment, aux))
-			return false;
+		aux->addr = addr;
+		if (!vm_alloc_page_with_initializer (VM_FILE, addr,
+					writable, lazy_load_mmap, aux)){
+			//printf("false??????\n");
+			return NULL;
+					}
 		//ofs += PGSIZE; 
 		
 		/* Advance. */
-		ofs += page_read_bytes;
+		offset += page_read_bytes;
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
-		upage += PGSIZE;
+		addr += PGSIZE;
 	}
+	return temp;
 }
 void munmap (void *addr){
 
 }
+
 
 /* Reads a byte at user virtual address UADDR.
  * UADDR must be below KERN_BASE.

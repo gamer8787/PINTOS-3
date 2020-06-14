@@ -38,6 +38,7 @@ struct information {
 	off_t ofs;
 	size_t page_read_bytes;
 	size_t page_zero_bytes;
+	void * addr;
 };
 /* The representation of "page".
  * This is kind of "parent class", which has four "child class"es, which are
