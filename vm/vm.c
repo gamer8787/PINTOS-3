@@ -182,7 +182,6 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	//printf("fault 111\n");
 	if(page ==NULL){
 		if(not_present){
-			printf("fault 2222\n");
 			void * a= (void *)(((uintptr_t )addr) - f->rsp );
 			if(0xfffffffffffff000 < a || a <= PGSIZE*250){
 				while(f->rsp > ((uintptr_t )addr ) ) { //아직 잘 모름 4096
@@ -202,10 +201,8 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 		}
 	}
 	else{
-		printf("not null\n");
+
 	}
-	printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
-	//bool i = vm_do_claim_page (page);
 	return vm_do_claim_page (page);
 }
 /* Free the page.
@@ -242,7 +239,6 @@ vm_do_claim_page (struct page *page) {
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
 	//spt_insert_page(&thread_current()->spt, page);  
 	pml4_set_page (thread_current()->pml4, page->va, frame->kva, page->writable);
-	printf("in  do claime page\n");
 	return swap_in (page, frame->kva);
 }
 

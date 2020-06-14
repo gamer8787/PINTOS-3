@@ -329,16 +329,15 @@ lazy_load_mmap (struct page *page, void *aux) {
 	size_t page_read_bytes = information -> page_read_bytes;
 	size_t page_zero_bytes = information -> page_zero_bytes;
 	void *addr = information -> addr;
-	printf("page_read_bytes is %d\n",page_read_bytes);
-	printf("null? %d\n",file==NULL);
 	off_t a = file_read_at (file, addr, page_read_bytes, ofs);
-	printf("a is %d\n",a);
+	//printf("a is %d\n",a);
+	/*
 	if(file_read_at (file, addr, page_read_bytes, ofs) != page_read_bytes){
 		printf("here!!!!!!!\n");
 		return false;
 	}
-	printf("here!!!!!!!\n");
-	memset ( addr + page_read_bytes , 0, page_zero_bytes);
+	*/
+	memset ( addr + a , 0, page_zero_bytes + page_read_bytes - a);
 	return true;
 }
 void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
@@ -354,8 +353,6 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
 		return NULL;
 	}
 	struct file *file = process_get_file(fd);
-	printf("lenghh is %d\n",length);
-	printf("offset is %d\n",offset);
 	uint32_t read_bytes = length;
 	uint32_t zero_bytes = (read_bytes % PGSIZE)? 0 : PGSIZE - pg_ofs(length);
 	while (read_bytes > 0 || zero_bytes > 0) {
@@ -375,7 +372,6 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
 		aux->addr = addr;
 		if (!vm_alloc_page_with_initializer (VM_FILE, addr,
 					writable, lazy_load_mmap, aux)){
-			//printf("false??????\n");
 			return NULL;
 					}
 		//ofs += PGSIZE; 

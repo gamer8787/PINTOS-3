@@ -47,16 +47,14 @@ uninit_new (struct page *page, void *va, vm_initializer *init,
 static bool
 uninit_initialize (struct page *page, void *kva) {
 	struct uninit_page *uninit = &page->uninit;
+
 	/* Fetch first, page_initialize may overwrite the values */
 	vm_initializer *init = uninit->init;
 	void *aux = uninit->aux;
+
 	/* TODO: You may need to fix this function. */
-	page->is_uninit_init=true;
-	printf("hy??\n");
-	bool i =uninit->page_initializer (page, uninit->type, kva);
-	int c = (init ? 5 : 9);
-	printf("%d, %d\n",i,c);
-	return i&&(init ? init (page, aux) : true);
+	return uninit->page_initializer (page, uninit->type, kva) &&
+		(init ? init (page, aux) : true);
 }
 
 /* Free the resources hold by uninit_page. Although most of pages are transmuted
