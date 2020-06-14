@@ -180,29 +180,28 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	//printf("addr is %p\n",addr);
 	//printf("rsp  is %p\n",f->rsp);	
 	//void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
-	
 	page = spt_find_page(spt, pg_round_down (addr));
-	//check_address(addr);
 	//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
 	if(page ==NULL){
 		if(not_present){
-			void * a= (void *)(f->rsp - ((uintptr_t )pg_round_down(addr)));
-			void * b= (void *)(f->rsp - ((uintptr_t )pg_round_down(addr)));
-			if(0 <= a && a <= PGSIZE*250){
-				printf("hy!\n");
-				printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
-				printf("%p\n",a);
-				while(f->rsp >= ((uintptr_t )pg_round_down(addr) ) ){
+			void * a= (void *)(((uintptr_t )addr) - f->rsp );
+			/*
+			printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
+			printf("%p\n",a);
+			printf("%d\n",sizeof(&addr));*/
+			if(0xfffffffffffff000 < a || a <= PGSIZE*250){
+				while(f->rsp > ((uintptr_t )addr ) ) { //아직 잘 모름 4096
 					vm_stack_growth(pg_round_down(addr));
 					addr += PGSIZE;
-					printf("222222\n");
-					//printf("a is %x\n",a);
+					//printf("hy!\n");
+					//printf("%p, %p, %d, %d, %d\n", f->rsp, addr, not_present,user,write);
 				}
+				//printf("2222222222\n");
 			}  
 			else {
-				printf("1111111\n");
 				check_address(addr);
 			}
+			//printf("333333333333\n");
 			return true; 
 		}
 		else{

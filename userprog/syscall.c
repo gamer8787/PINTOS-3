@@ -12,6 +12,7 @@
 #include "filesys/file.h"
 #include "filesys/filesys.h"
 #include <string.h>
+#include <process.h>
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -98,6 +99,10 @@ syscall_handler (struct intr_frame *f UNUSED) {
 		case SYS_CLOSE:
 			close(reg.rdi);
 			break;
+		case SYS_MMAP:
+			mmap(reg.rdi, reg.rsi, reg.rdx, reg.r10, reg.r8);
+		case SYS_MUNMAP:
+			munmap(reg.rdi);
 		default:
 			break;
 	}
@@ -122,7 +127,7 @@ void halt(void) {
 }
 
 void exit(int status) {
-	struct thread *curr = thread_current();
+	struct thread *curr = thread_current(); 
 	curr->terminate_status = status;
 	printf("%s: exit(%d)\n", curr->name, status);
 	thread_exit();
@@ -312,6 +317,63 @@ unsigned tell(int fd){
 
 void close(int fd){
 	process_close_file(fd);
+}
+
+void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
+	size_t temp = length;
+	off_t ofs =offset;
+	if(length ==0 ){
+		return  NULL;
+	}
+	if(addr == 0){
+		return  NULL;
+	}
+	if(pg_ofs (addr) != 0){
+		return NULL;
+	}
+	struct file *file = process_get_file(fd);
+	size_t page_read_bytes;
+	size_t page_zero_bytes;
+	while(length>0){
+		page_read_bytes = length < PGSIZE ? length : PGSIZE;
+		page_zero_bytes = PGSIZE - length;
+		if(file_read_at (file, addr , page_read_bytes, offset) != page_read_bytes){
+			return false;
+		}
+		offset += page_read_bytes;
+		length -= page_read_bytes;	
+	}
+	memset ( addr + ofs, 0, page_zero_bytes);
+	uint32_t zero_bytes = page_zero_bytes;
+	uint32_t read_bytes = temp;
+	uint8_t *upage = addr;
+	while (read_bytes > 0 || zero_bytes > 0) {
+		/* Do calculate how to fill this page.
+		 * We will read PAGE_READ_BYTES bytes from FILE
+		 * and zero the final PAGE_ZERO_BYTES bytes. */
+		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
+		size_t page_zero_bytes = PGSIZE - page_read_bytes;
+
+		/* TODO: Set up aux to pass information to the lazy_load_segment. */
+		struct information *aux = NULL ;
+		aux = malloc(sizeof(struct information));
+		aux->file = file;
+		aux->ofs = ofs;
+		aux->page_read_bytes = page_read_bytes;
+		aux->page_zero_bytes = page_zero_bytes;
+		if (!vm_alloc_page_with_initializer (VM_FILE, upage, writable, lazy_load_segment, aux))
+			return false;
+		//ofs += PGSIZE; 
+		
+		/* Advance. */
+		ofs += page_read_bytes;
+		read_bytes -= page_read_bytes;
+		zero_bytes -= page_zero_bytes;
+		upage += PGSIZE;
+	}
+}
+void munmap (void *addr){
+
 }
 
 /* Reads a byte at user virtual address UADDR.
