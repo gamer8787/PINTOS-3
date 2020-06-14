@@ -193,7 +193,7 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 			else {
 				//printf("fault 3333\n");
 				
-				//check_address(addr);
+				check_address(addr);
 			}
 		}
 		else{
