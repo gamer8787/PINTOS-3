@@ -188,7 +188,7 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 				while(f->rsp > ((uintptr_t )addr ) ) { //아직 잘 모름 4096
 					vm_stack_growth(pg_round_down(addr));
 					addr += PGSIZE;
-				}
+				} 
 				return true;
 			}  
 			else {
@@ -200,9 +200,9 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 		else{
 			//return false;
 		}
-	}
-	else{
-
+	}  
+	else{ 
+      
 	}
 	return vm_do_claim_page (page);
 }
