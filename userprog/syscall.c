@@ -12,7 +12,7 @@
 #include "filesys/file.h"
 #include "filesys/filesys.h"
 #include <string.h>
-
+#include "vm/vm.h"
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 void check_address(void *addr);
@@ -338,6 +338,7 @@ lazy_load_mmap (struct page *page, void *aux) {
 	}
 	*/
 	memset ( addr + a , 0, page_zero_bytes + page_read_bytes - a);
+	//page->is_mmap = true;
 	return true;
 }
 void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
@@ -389,7 +390,9 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset){
 	return temp;
 }
 void munmap (void *addr){
-
+	//memset ( addr, 0, PGSIZE);
+	//printf("hi!\n");
+	//return;
 }
 
 

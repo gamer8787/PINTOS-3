@@ -80,19 +80,20 @@ inode_create (disk_sector_t sector, off_t length) {
 		size_t sectors = bytes_to_sectors (length);
 		disk_inode->length = length;
 		disk_inode->magic = INODE_MAGIC;
-		if (free_map_allocate (sectors, &disk_inode->start)) {
-			disk_write (filesys_disk, sector, disk_inode);
-			if (sectors > 0) {
-				static char zeros[DISK_SECTOR_SIZE];
-				size_t i;
+		//if (free_map_allocate (sectors, &disk_inode->start)) {
+		disk_write (filesys_disk, sector, disk_inode);
+		if (sectors > 0) {
+			static char zeros[DISK_SECTOR_SIZE];
+			size_t i;
 
-				for (i = 0; i < sectors; i++) 
-					disk_write (filesys_disk, disk_inode->start + i, zeros); 
-			}
-			success = true; 
-		} 
+			for (i = 0; i < sectors; i++) 
+				disk_write (filesys_disk, disk_inode->start + i, zeros); 
+		}
+		success = true; 
+		//} 
 		free (disk_inode);
 	}
+	printf("hi3\n");
 	return success;
 }
 

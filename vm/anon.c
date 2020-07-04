@@ -14,9 +14,9 @@ static const struct page_operations anon_ops = {
 	.swap_in = anon_swap_in,
 	.swap_out = anon_swap_out,
 	.destroy = anon_destroy,
-	.type = VM_ANON,
+	.type = VM_ANON, 
 };
-
+     
 /* Initialize the data for anonymous pages */
 void
 vm_anon_init (void) {
