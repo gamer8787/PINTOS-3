@@ -6,7 +6,7 @@
 #include "filesys/filesys.h"
 #include "filesys/free-map.h"
 #include "threads/malloc.h"
-
+#include "filesys/fat.h"
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
 
@@ -80,20 +80,20 @@ inode_create (disk_sector_t sector, off_t length) {
 		size_t sectors = bytes_to_sectors (length);
 		disk_inode->length = length;
 		disk_inode->magic = INODE_MAGIC;
-		//if (free_map_allocate (sectors, &disk_inode->start)) {
-		disk_write (filesys_disk, sector, disk_inode);
-		if (sectors > 0) {
-			static char zeros[DISK_SECTOR_SIZE];
-			size_t i;
+		if (free_map_allocate (sectors, &disk_inode->start)) {
+			disk_write (filesys_disk, sector, disk_inode);
+			if (sectors > 0) {
+				static char zeros[DISK_SECTOR_SIZE];
+				size_t i;
 
-			for (i = 0; i < sectors; i++) 
-				disk_write (filesys_disk, disk_inode->start + i, zeros); 
-		}
-		success = true; 
-		//} 
+				for (i = 0; i < sectors; i++) 
+					disk_write (filesys_disk, disk_inode->start + i, zeros); 
+			}
+			success = true; 
+		} 
 		free (disk_inode);
 	}
-	printf("hi3\n");
+	//printf("hi3\n");
 	return success;
 }
 
@@ -152,7 +152,7 @@ inode_close (struct inode *inode) {
 	/* Ignore null pointer. */
 	if (inode == NULL)
 		return;
-
+	//printf("inode_close\n");
 	/* Release resources if this was the last opener. */
 	if (--inode->open_cnt == 0) {
 		/* Remove from inode list and release lock. */
@@ -185,17 +185,17 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 	uint8_t *buffer = buffer_;
 	off_t bytes_read = 0;
 	uint8_t *bounce = NULL;
-
 	while (size > 0) {
 		/* Disk sector to read, starting byte offset within sector. */
 		disk_sector_t sector_idx = byte_to_sector (inode, offset);
+		//disk_sector_t sector_idx = cluster_to_sector (offset);
 		int sector_ofs = offset % DISK_SECTOR_SIZE;
 
 		/* Bytes left in inode, bytes left in sector, lesser of the two. */
 		off_t inode_left = inode_length (inode) - offset;
 		int sector_left = DISK_SECTOR_SIZE - sector_ofs;
 		int min_left = inode_left < sector_left ? inode_left : sector_left;
-
+		
 		/* Number of bytes to actually copy out of this sector. */
 		int chunk_size = size < min_left ? size : min_left;
 		if (chunk_size <= 0)
@@ -203,8 +203,9 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 
 		if (sector_ofs == 0 && chunk_size == DISK_SECTOR_SIZE) {
 			/* Read full sector directly into caller's buffer. */
+			//disk_read (filesys_disk, sector_idx, buffer + bytes_read); 
 			disk_read (filesys_disk, sector_idx, buffer + bytes_read); 
-		} else {
+		} else {	
 			/* Read sector into bounce buffer, then partially copy
 			 * into caller's buffer. */
 			if (bounce == NULL) {
@@ -212,6 +213,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 				if (bounce == NULL)
 					break;
 			}
+			//disk_read (filesys_disk, sector_idx, bounce);
 			disk_read (filesys_disk, sector_idx, bounce);
 			memcpy (buffer + bytes_read, bounce + sector_ofs, chunk_size);
 		}

@@ -110,7 +110,6 @@ fsutil_put (char **argv) {
 	dst = filesys_open (file_name);
 	if (dst == NULL)
 		PANIC ("%s: open failed", file_name);
-
 	/* Do copy. */
 	while (size > 0) {
 		int chunk_size = size > DISK_SECTOR_SIZE ? DISK_SECTOR_SIZE : size;

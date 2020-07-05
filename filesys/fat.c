@@ -111,14 +111,14 @@ fat_close (void) {
 			free (bounce);
 		}
 	}
-}
+} 
 
 void
 fat_create (void) {
 	// Create FAT boot
 	fat_boot_create ();
 	fat_fs_init ();
-	printf("total sectors : %d, fat sectors :%d\n",fat_fs->bs.total_sectors, fat_fs->bs.fat_sectors);
+	//printf("total sectors : %d, fat sectors :%d\n",fat_fs->bs.total_sectors, fat_fs->bs.fat_sectors);
 	// Create FAT table
 	fat_fs->fat = calloc (fat_fs->fat_length, sizeof (cluster_t));
 	if (fat_fs->fat == NULL)
@@ -153,8 +153,10 @@ fat_boot_create (void) {
 void
 fat_fs_init (void) {
 	/* TODO: Your code goes here. */
+	//printf("fat_fs_init \n");
 	fat_fs->fat_length = fat_fs->bs.fat_sectors;
 	fat_fs->data_start = fat_fs->bs.fat_start;
+	//printf("%d, %d\n",fat_fs->fat_length,fat_fs->data_start);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -167,8 +169,10 @@ fat_fs_init (void) {
 cluster_t
 fat_create_chain (cluster_t clst) {
 	/* TODO: Your code goes here. */	
+	//printf("create chain\n");
 	if(clst != 0){
-		fat_fs->fat[fat_fs->last_clst] = clst; //맞는지 모름
+		//fat_fs->fat[fat_fs->last_clst] = clst; //맞는지 모름
+		fat_fs->fat[clst-1] = clst; 
 		fat_fs->fat[clst] = EOChain;
 	}
 	else{ 
@@ -183,6 +187,7 @@ fat_create_chain (cluster_t clst) {
 void
 fat_remove_chain (cluster_t clst, cluster_t pclst) {
 	/* TODO: Your code goes here. */
+	//printf("remove chain\n");
 	if(pclst != 0){
 		fat_fs->fat[pclst] = EOChain;
 	}
@@ -218,5 +223,7 @@ fat_get (cluster_t clst) {
 disk_sector_t
 cluster_to_sector (cluster_t clst) {
 	/* TODO: Your code goes here. */
-	return clst + 100;
+	//printf("cluster_to_sector \n");
+	//return clst + fat_fs->bs.fat_sectors ;
+	return clst + 1 ;
 }

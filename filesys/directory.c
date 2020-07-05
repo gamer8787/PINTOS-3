@@ -81,13 +81,11 @@ lookup (const struct dir *dir, const char *name,
 		struct dir_entry *ep, off_t *ofsp) {
 	struct dir_entry e;
 	size_t ofs;
-
 	ASSERT (dir != NULL);
 	ASSERT (name != NULL);
 
 	for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 			ofs += sizeof e)
-		printf("here?\n");
 		if (e.in_use && !strcmp (name, e.name)) {
 			if (ep != NULL)
 				*ep = e;
@@ -140,7 +138,6 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector) {
 	/* Check that NAME is not in use. */
 	if (lookup (dir, name, NULL, NULL))
 		goto done;
-	printf("fkc\n");
 	/* Set OFS to offset of free slot.
 	 * If there are no free slots, then it will be set to the
 	 * current end-of-file.
